@@ -1,16 +1,16 @@
-#include <cstdlib>
-#include <cstdio>
-#include <iostream>
-#include <fstream>
-#include <unistd.h>
-#include <getopt.h>
-#include <queue>
-#include <string.h>
-#include <unordered_map>
-#include <cmath>
-#include <set>
 #include <algorithm>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
+#include <getopt.h>
+#include <iostream>
+#include <queue>
+#include <set>
 #include <sstream>
+#include <string>
+#include <unistd.h>
+#include <unordered_map>
 #include <vector>
 
 using namespace std;
@@ -19,23 +19,23 @@ class DnsShiftWindow {
 
 public:
 
-    queue<string> dns_fifo_  ;       // FIFO queue of processed domains
-    unordered_map<string,int> freq_; // Mapping from domain to its frequencies in current window
-    double current_metric_;          // Memoized concentration metric for current window state
-    vector<double> distribution_;    // Probability distribution of so-far calculated metrics
-    unsigned int dist_bins_;
+    queue<string> dns_fifo_  ;            // FIFO queue of processed domains
+    unordered_map<string,unsigned> freq_; // Mapping from domain to its frequencies in current window
+    double current_metric_;               // Memoized concentration metric for current window state
+    vector<unsigned> distribution_;       // Probability distribution of so-far calculated metrics, stored as number of observations for distribution bins
+    unsigned dist_bins_;                  // Number of bins in metrics distribution
 
 public:
 
     // Default constructor
-    DnsShiftWindow(const unsigned int bins) {
-        distribution_ = vector<double>(bins, 0);
+    explicit DnsShiftWindow(const unsigned bins) : 
+        distribution_(bins,0) {
         dist_bins_ = bins;
         current_metric_ = 0.0;
     }
 
     // Calculates given metric for one domain
-    double domain_metric(int domain_val) {
+    double domain_metric(const unsigned domain_val) {
         if(domain_val == 0) {
             return 0.0;
         }
@@ -44,10 +44,10 @@ public:
         return -1 * domain_freq * log(domain_freq);
         }
     }
-
+  
     // Calculate given metric for dns_fifo
     double fifo_metric() {
-        double metric_value = 0; double n = dns_fifo_.size();
+        double metric_value = 0;
         for(auto it = freq_.begin(); it != freq_.end(); ++it) {
             //metric_value -= (it->second / n) * log(it->second / n);
             metric_value += domain_metric(it->second);
@@ -78,33 +78,33 @@ public:
     void forward_shift(const string& domain) {
         insert(domain); pop(); current_metric_ = fifo_metric();
 
-        int distribution_bin = floor(current_metric_ * dist_bins_);
+        unsigned distribution_bin = static_cast<unsigned>(floor(current_metric_ * dist_bins_));
         ++distribution_[distribution_bin];
     }
 
     // Save distribution to file
-    void save_distribution(string file_name, bool log) {
+    void save_distribution(const string& file_name, bool log) {
         vector<double> distribution_values = vector<double>(dist_bins_, 0);
-        int observations_count = 0;
-        for(unsigned int i = 0; i < dist_bins_; ++i) {
+        unsigned observations_count = 0;
+        for(unsigned i = 0; i < dist_bins_; ++i) {
                 observations_count += distribution_[i];
         }
 
         if(log) {
-            for(unsigned int i = 0; i < dist_bins_; ++i) {
+            for(unsigned i = 0; i < dist_bins_; ++i) {
                 ++distribution_[i];
             }
-            for(unsigned int i = 0; i < dist_bins_; ++i) {
+            for(unsigned i = 0; i < dist_bins_; ++i) {
                 distribution_values[i] = log10(distribution_[i] / observations_count);
             }
         } else {
-            for(unsigned int i = 0; i < dist_bins_; ++i) {
+            for(unsigned i = 0; i < dist_bins_; ++i) {
                 distribution_values[i] = round(100 * dist_bins_ * distribution_[i] / observations_count);
             }
         }
 
         ofstream output_file(file_name);
-        for(unsigned int i = 0; i < dist_bins_; ++i) {
+        for(unsigned i = 0; i < dist_bins_; ++i) {
             output_file << distribution_values[i] << endl;
         }
     }
@@ -123,7 +123,7 @@ static string GetDnsFld(const string& domain) {
         tld = token;
     }
     return fld + "." + tld;
-};
+}
 
 /**
  * ENTRYPOINT
