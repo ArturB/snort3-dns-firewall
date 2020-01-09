@@ -13,14 +13,13 @@
 #include <unordered_map>
 #include <vector>
 
-extern char *optarg;
+extern char* optarg;
 
 using namespace std;
 
 // Runtime options of the program
 class ProgramOptions
 {
-
   public:
     unsigned bins_;
     unsigned window_size_;
@@ -29,12 +28,12 @@ class ProgramOptions
     bool log_distribution_;
 
   public:
-    ProgramOptions(int argc, char *const argv[])
-        : bins_(1000)
-        , window_size_(1000)
-        , data_filename_()
-        , output_filename_("snort4gini.out")
-        , log_distribution_(false)
+    ProgramOptions(int argc, char* const argv[])
+      : bins_(1000)
+      , window_size_(1000)
+      , data_filename_()
+      , output_filename_("snort4gini.out")
+      , log_distribution_(false)
     {
         int opt;
         while ((opt = getopt(argc, argv, "b:f:w:o:l")) != -1) {
@@ -65,13 +64,13 @@ class ProgramOptions
     void print_help()
     {
         string help =
-            "snort4gini usage:\n"
-            "   -b: Number of bins when estimating distribution"
-            "   -f: File name of the dataset to process (mandatory)\n"
-            "   -l: if flag set, the result distribution will be in log "
-            "scale (default: no)\n"
-            "   -o: Output file name (default: snort4gini.out)\n"
-            "   -w: size of shifting window (default: 1000)\n";
+          "snort4gini usage:\n"
+          "   -b: Number of bins when estimating distribution\n"
+          "   -f: File name of the dataset to process (mandatory)\n"
+          "   -l: if flag set, the result distribution will be in "
+          "log scale (default: no)\n"
+          "   -o: Output file name (default: snort4gini.out)\n"
+          "   -w: size of shifting window (default: 1000)\n";
         cout << help << endl;
     }
 };
@@ -79,22 +78,21 @@ class ProgramOptions
 // Shifting window, calculating concentration metric in constant memory
 class DnsShiftWindow
 {
-
   public:
     queue<string> dns_fifo_; // FIFO queue of processed domains
     unordered_map<string, unsigned>
-        freq_; // Mapping from domain to its frequencies in current window
-    double current_metric_; // Memoized concentration metric for current window
-                            // state
-    vector<unsigned>
-        distribution_; // Probability distribution of so-far calculated metrics,
-                       // stored as number of observations for distribution bins
-    unsigned dist_bins_; // Number of bins in metrics distribution
+      freq_; // Mapping from domain to its frequencies in current window
+    double current_metric_;         // Memoized concentration metric for current
+                                    // window state
+    vector<unsigned> distribution_; // Probability distribution of so-far
+                                    // calculated metrics, stored as number
+                                    // of observations for distribution bins
+    unsigned dist_bins_;            // Number of bins in metrics distribution
 
   public:
     // Default constructor
     explicit DnsShiftWindow(const unsigned bins)
-        : distribution_(bins, 0)
+      : distribution_(bins, 0)
     {
         dist_bins_ = bins;
         current_metric_ = 0.0;
@@ -116,7 +114,8 @@ class DnsShiftWindow
     {
         double metric_value = 0;
         for (auto it = freq_.begin(); it != freq_.end(); ++it) {
-            // metric_value -= (it->second / n) * log(it->second / n);
+            // metric_value -= (it->second / n) * log(it->second /
+            // n);
             metric_value += domain_metric(it->second);
         }
         return metric_value / log(dns_fifo_.size());
@@ -124,7 +123,7 @@ class DnsShiftWindow
 
     // Insert new domain to window
     // Updates current_metric value
-    void insert(const string &domain)
+    void insert(const string& domain)
     {
         dns_fifo_.push(domain);
         ++freq_[domain];
@@ -144,19 +143,19 @@ class DnsShiftWindow
     }
 
     // Shift window to new domain
-    void forward_shift(const string &domain)
+    void forward_shift(const string& domain)
     {
         insert(domain);
         pop();
         current_metric_ = fifo_metric();
 
         unsigned distribution_bin =
-            static_cast<unsigned>(floor(current_metric_ * dist_bins_));
+          static_cast<unsigned>(floor(current_metric_ * dist_bins_));
         ++distribution_[distribution_bin];
     }
 
     // Save distribution to file
-    void save_distribution(const string &file_name, bool log)
+    void save_distribution(const string& file_name, bool log)
     {
         vector<double> distribution_values = vector<double>(dist_bins_, 0);
         unsigned observations_count = 0;
@@ -169,13 +168,13 @@ class DnsShiftWindow
                 ++distribution_[i];
             }
             for (unsigned i = 0; i < dist_bins_; ++i) {
-                distribution_values[i] = log10(double(distribution_[i]) /
-                                               double(observations_count));
+                distribution_values[i] =
+                  log10(double(distribution_[i]) / double(observations_count));
             }
         } else {
             for (unsigned i = 0; i < dist_bins_; ++i) {
                 distribution_values[i] =
-                    double(distribution_[i]) / double(observations_count);
+                  double(distribution_[i]) / double(observations_count);
             }
         }
 
@@ -188,7 +187,8 @@ class DnsShiftWindow
 
 // Get first-level DNS domain from string
 // E.g. for s2.smtp.google.com function returns google.com
-static string GetDnsFld(const string &domain)
+static string
+GetDnsFld(const string& domain)
 {
     string token;
     string fld;
@@ -204,8 +204,10 @@ static string GetDnsFld(const string &domain)
 /**
  * ENTRYPOINT
  */
-int main(int argc, char *const argv[])
+int
+main(int argc, char* const argv[])
 {
+    // Load and print program options
     cout << "snort4gini 0.1.1 by Artur M. Brodzki" << endl;
     ProgramOptions options = ProgramOptions(argc, argv);
 
@@ -218,6 +220,7 @@ int main(int argc, char *const argv[])
 
     cout << "Processing data..." << endl;
 
+    // Process data line by line
     ifstream dataset_file(options.data_filename_);
     string line;
     unsigned processed_lines = 0;
@@ -232,6 +235,7 @@ int main(int argc, char *const argv[])
         processed_lines++;
     }
 
+    // Save result distribution to file
     window.save_distribution(options.output_filename_,
                              options.log_distribution_);
     cout << "Distribution saved to " << options.output_filename_ << "!" << endl;

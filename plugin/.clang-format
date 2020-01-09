@@ -1,3 +1,4 @@
+BasedOnStyle: Mozilla
+AlwaysBreakBeforeMultilineStrings: true
+IndentCaseLabels: false
 IndentWidth: 4
-BreakBeforeBraces: Linux
-BreakConstructorInitializers: BeforeComma
