@@ -28,36 +28,36 @@ class ProgramOptions
     bool log_distribution_;
 
   public:
-    ProgramOptions(int argc, char* const argv[])
-      : bins_(1000)
-      , window_size_(1000)
-      , data_filename_()
-      , output_filename_("snort4gini.out")
-      , log_distribution_(false)
+    ProgramOptions( int argc, char* const argv[] )
+        : bins_( 1000 )
+        , window_size_( 1000 )
+        , data_filename_()
+        , output_filename_( "snort4gini.out" )
+        , log_distribution_( false )
     {
         int opt;
-        while ((opt = getopt(argc, argv, "b:f:w:o:l")) != -1) {
-            switch (opt) {
+        while( ( opt = getopt( argc, argv, "b:f:w:o:l" ) ) != -1 ) {
+            switch( opt ) {
             case 'b':
-                bins_ = static_cast<unsigned>(stoi(optarg));
+                bins_ = static_cast<unsigned>( stoi( optarg ) );
                 break;
             case 'f':
-                data_filename_ = string(optarg);
+                data_filename_ = string( optarg );
                 break;
             case 'w':
-                window_size_ = static_cast<unsigned>(stoi(optarg));
+                window_size_ = static_cast<unsigned>( stoi( optarg ) );
                 break;
             case 'o':
-                output_filename_ = string(optarg);
+                output_filename_ = string( optarg );
                 break;
             case 'l':
                 log_distribution_ = true;
                 break;
             }
         }
-        if (data_filename_.empty()) {
+        if( data_filename_.empty() ) {
             print_help();
-            exit(1);
+            exit( 1 );
         }
     }
 
@@ -67,8 +67,7 @@ class ProgramOptions
           "snort4gini usage:\n"
           "   -b: Number of bins when estimating distribution\n"
           "   -f: File name of the dataset to process (mandatory)\n"
-          "   -l: if flag set, the result distribution will be in "
-          "log scale (default: no)\n"
+          "   -l: if flag set, the result distribution will be in log scale (default: no)\n"
           "   -o: Output file name (default: snort4gini.out)\n"
           "   -w: size of shifting window (default: 1000)\n";
         cout << help << endl;
@@ -79,33 +78,30 @@ class ProgramOptions
 class DnsShiftWindow
 {
   public:
-    queue<string> dns_fifo_; // FIFO queue of processed domains
-    unordered_map<string, unsigned>
-      freq_; // Mapping from domain to its frequencies in current window
-    double current_metric_;         // Memoized concentration metric for current
-                                    // window state
-    vector<unsigned> distribution_; // Probability distribution of so-far
-                                    // calculated metrics, stored as number
-                                    // of observations for distribution bins
-    unsigned dist_bins_;            // Number of bins in metrics distribution
+    queue<string> dns_fifo_;               // FIFO queue of processed domains
+    unordered_map<string, unsigned> freq_; // Mapping from domain to its frequencies in current window
+    double current_metric_;                // Memoized concentration metric for current window state
+    vector<unsigned> distribution_;        // Probability distribution of so-far calculated metrics,
+                                           // stored as number of observations for distribution bins
+    unsigned dist_bins_;                   // Number of bins in metrics distribution
 
   public:
     // Default constructor
-    explicit DnsShiftWindow(const unsigned bins)
-      : distribution_(bins, 0)
+    explicit DnsShiftWindow( unsigned bins )
+        : distribution_( bins, 0 )
     {
         dist_bins_ = bins;
         current_metric_ = 0.0;
     }
 
     // Calculates given metric for one domain
-    double domain_metric(const unsigned domain_val)
+    double domain_metric( unsigned domain_val )
     {
-        if (domain_val == 0) {
+        if( domain_val == 0 ) {
             return 0.0;
         } else {
-            double domain_freq = double(domain_val) / double(dns_fifo_.size());
-            return -1 * domain_freq * log(domain_freq);
+            double domain_freq = double( domain_val ) / double( dns_fifo_.size() );
+            return -1 * domain_freq * log( domain_freq );
         }
     }
 
@@ -113,19 +109,17 @@ class DnsShiftWindow
     double fifo_metric()
     {
         double metric_value = 0;
-        for (auto it = freq_.begin(); it != freq_.end(); ++it) {
-            // metric_value -= (it->second / n) * log(it->second /
-            // n);
-            metric_value += domain_metric(it->second);
+        for( auto it = freq_.begin(); it != freq_.end(); ++it ) {
+            metric_value += domain_metric( it->second );
         }
-        return metric_value / log(dns_fifo_.size());
+        return metric_value / log( dns_fifo_.size() );
     }
 
     // Insert new domain to window
     // Updates current_metric value
-    void insert(const string& domain)
+    void insert( const string& domain )
     {
-        dns_fifo_.push(domain);
+        dns_fifo_.push( domain );
         ++freq_[domain];
     }
 
@@ -138,106 +132,123 @@ class DnsShiftWindow
         dns_fifo_.pop();
         --freq_[domain];
         // Remove domain if last occurence deleted
-        if (freq_[domain] == 0)
-            freq_.erase(domain);
+        if( freq_[domain] == 0 )
+            freq_.erase( domain );
     }
 
     // Shift window to new domain
-    void forward_shift(const string& domain)
+    void forward_shift( const string& domain )
     {
-        insert(domain);
-        pop();
-        current_metric_ = fifo_metric();
+        string popped = dns_fifo_.front();
 
-        unsigned distribution_bin =
-          static_cast<unsigned>(floor(current_metric_ * dist_bins_));
+        double old_inserted_domain_metric = 0;
+        if( freq_.count( domain ) > 0 )
+            old_inserted_domain_metric = domain_metric( freq_[domain] );
+        double old_popped_domain_metric = domain_metric( freq_[popped] );
+
+        insert( domain );
+        pop();
+
+        double new_inserted_domain_metric = domain_metric( freq_[domain] );
+        double new_popped_domain_metric = 0;
+        if( freq_.count( popped ) > 0 )
+            new_popped_domain_metric = domain_metric( freq_[popped] );
+
+        double delta_inserted = new_inserted_domain_metric - old_inserted_domain_metric;
+        double delta_popped = new_popped_domain_metric - old_popped_domain_metric;
+        current_metric_ += ( delta_inserted + delta_popped ) / log( dns_fifo_.size() );
+        if( current_metric_ < 1e-20 ) {
+            current_metric_ = fifo_metric();
+        }
+
+        unsigned distribution_bin = static_cast<unsigned>( floor( current_metric_ * dist_bins_ ) );
         ++distribution_[distribution_bin];
     }
 
     // Save distribution to file
-    void save_distribution(const string& file_name, bool log)
+    void save_distribution( const string& file_name, bool log )
     {
-        vector<double> distribution_values = vector<double>(dist_bins_, 0);
+        vector<double> distribution_values = vector<double>( dist_bins_, 0 );
         unsigned observations_count = 0;
-        for (unsigned i = 0; i < dist_bins_; ++i) {
+        for( unsigned i = 0; i < dist_bins_; ++i ) {
             observations_count += distribution_[i];
         }
 
-        if (log) {
-            for (unsigned i = 0; i < dist_bins_; ++i) {
+        if( log ) {
+            for( unsigned i = 0; i < dist_bins_; ++i ) {
                 ++distribution_[i];
             }
-            for (unsigned i = 0; i < dist_bins_; ++i) {
-                distribution_values[i] =
-                  log10(double(distribution_[i]) / double(observations_count));
+            for( unsigned i = 0; i < dist_bins_; ++i ) {
+                distribution_values[i] = log10( double( distribution_[i] ) / double( observations_count ) );
             }
         } else {
-            for (unsigned i = 0; i < dist_bins_; ++i) {
-                distribution_values[i] =
-                  double(distribution_[i]) / double(observations_count);
+            for( unsigned i = 0; i < dist_bins_; ++i ) {
+                distribution_values[i] = double( distribution_[i] ) / double( observations_count );
             }
         }
 
-        ofstream output_file(file_name);
-        for (unsigned i = 0; i < dist_bins_; ++i) {
+        ofstream output_file( file_name );
+        for( unsigned i = 0; i < dist_bins_; ++i ) {
             output_file << distribution_values[i] << endl;
         }
     }
 };
 
-// Get first-level DNS domain from string
-// E.g. for s2.smtp.google.com function returns google.com
-static string
-GetDnsFld(const string& domain)
+// Get x-level suffix of DNS domain from string
+// e.g. for GetDnsFld(s2.smtp.google.com, 2) function returns google.com
+// dont work for empty string
+static string GetDnsFld( const string& domain, unsigned level )
 {
-    string token;
-    string fld;
-    string tld;
-    istringstream domain_ss(domain);
-    while (getline(domain_ss, token, '.')) {
-        fld = tld;
-        tld = token;
+    char delimiter = '.';
+    unsigned delimiters_passed = 0;
+    for( unsigned long i = domain.length() - 1; i > 0; --i ) {
+        if( domain[i] == delimiter ) {
+            ++delimiters_passed;
+            if( delimiters_passed == level )
+                return domain.substr( i + 1, domain.size() );
+        }
     }
-    return fld + "." + tld;
+    return string( domain );
 }
 
 /**
  * ENTRYPOINT
  */
-int
-main(int argc, char* const argv[])
+int main( int argc, char* const argv[] )
 {
     // Load and print program options
     cout << "snort4gini 0.1.1 by Artur M. Brodzki" << endl;
-    ProgramOptions options = ProgramOptions(argc, argv);
+    ProgramOptions options = ProgramOptions( argc, argv );
 
     cout << "Dataset file name = " << options.data_filename_ << endl;
     cout << "Window size = " << options.window_size_ << endl;
     cout << "Distribution Bins = " << options.bins_ << endl;
     cout << "Output file name = " << options.output_filename_ << endl;
-    if (options.log_distribution_)
+    if( options.log_distribution_ )
         cout << "Generating log-scale distribution..." << endl;
 
     cout << "Processing data..." << endl;
 
     // Process data line by line
-    ifstream dataset_file(options.data_filename_);
+    ifstream dataset_file( options.data_filename_ );
     string line;
     unsigned processed_lines = 0;
-    DnsShiftWindow window(options.bins_);
+    DnsShiftWindow window( options.bins_ );
 
-    while (getline(dataset_file, line)) {
-        if (processed_lines <= options.window_size_) {
-            window.insert(GetDnsFld(line));
+    while( getline( dataset_file, line ) ) {
+        if( line.empty() )
+            continue;
+        if( processed_lines <= options.window_size_ ) {
+            window.insert( GetDnsFld( line, 2 ) );
         } else {
-            window.forward_shift(GetDnsFld(line));
+            window.forward_shift( GetDnsFld( line, 2 ) );
+            // cout << line << ": " << GetDnsFld(".com") << endl;
         }
         processed_lines++;
     }
 
     // Save result distribution to file
-    window.save_distribution(options.output_filename_,
-                             options.log_distribution_);
+    window.save_distribution( options.output_filename_, options.log_distribution_ );
     cout << "Distribution saved to " << options.output_filename_ << "!" << endl;
     cout << "Processed lines: " << processed_lines << endl;
     return 0;
