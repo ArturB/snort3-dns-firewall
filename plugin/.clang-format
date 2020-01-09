@@ -3,6 +3,7 @@
 ####################################
 
 Language: Cpp
+Standard: Cpp11
 
 # Indentation
 AccessModifierOffset: -2
@@ -10,18 +11,20 @@ ContinuationIndentWidth: 2
 IndentCaseLabels: false
 IndentPPDirectives: AfterHash
 IndentWidth: 4
+IndentWrappedFunctionNames: true
 NamespaceIndentation: None
 
 # Breaking lines
 AlwaysBreakAfterDefinitionReturnType: None
+AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: true
 BreakBeforeBraces: Linux
+BreakBeforeTernaryOperators: true
 BreakConstructorInitializers: BeforeComma
 BreakInheritanceList: BeforeComma
 BreakStringLiterals: true
 ColumnLimit: 128
 CompactNamespaces: true
-KeepEmptyLinesAtTheStartOfBlocks: false
 ReflowComments: true
 
 # Single-liners
@@ -36,6 +39,9 @@ AllowShortLoopsOnASingleLine: false
 
 # Alignment
 AlignAfterOpenBracket: Align
+AlignConsecutiveMacros: false
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
 AlignEscapedNewlines: Left
 AlignOperands: true
 AlignTrailingComments: true
@@ -66,6 +72,10 @@ IncludeBlocks: Preserve
 SortIncludes: true
 SortUsingDeclarations: true
 
-#Other rules
+# Other
 BinPackArguments: false
 BinPackParameters: false
+FixNamespaceComments: true
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 1
+UseTab: Never

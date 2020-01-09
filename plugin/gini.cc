@@ -211,9 +211,9 @@ static string GetDnsFld( const string& domain, unsigned level )
     return string( domain );
 }
 
-/**
- * ENTRYPOINT
- */
+//------------//
+// ENTRYPOINT //
+//------------//
 int main( int argc, char* const argv[] )
 {
     // Load and print program options

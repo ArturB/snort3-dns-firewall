@@ -62,9 +62,9 @@ class ProgramOptions
     }
 };
 
-/**
- * ENTRYPOINT
- */
+//------------//
+// ENTRYPOINT //
+//------------//
 int main( int argc, char* const argv[] )
 {
     // Load and print program options
