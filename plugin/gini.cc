@@ -116,7 +116,7 @@ class DnsShiftWindow
     }
 
     // Insert new domain to window
-    // Updates current_metric value
+    // Does not update current_metric value
     void insert( const string& domain )
     {
         dns_fifo_.push( domain );
@@ -124,15 +124,13 @@ class DnsShiftWindow
     }
 
     // Pop domain from window
-    // Updates current_metric value
+    // Does not update current_metric value
     void pop()
     {
         string domain = dns_fifo_.front();
         // Pop domain
         dns_fifo_.pop();
-        --freq_[domain];
-        // Remove domain if last occurence deleted
-        if( freq_[domain] == 0 )
+        if( --freq_[domain] == 0 )
             freq_.erase( domain );
     }
 
@@ -141,26 +139,32 @@ class DnsShiftWindow
     {
         string popped = dns_fifo_.front();
 
-        double old_inserted_domain_metric = 0;
-        if( freq_.count( domain ) > 0 )
-            old_inserted_domain_metric = domain_metric( freq_[domain] );
-        double old_popped_domain_metric = domain_metric( freq_[popped] );
+        if( domain == popped ) {
+            dns_fifo_.push( domain );
+            dns_fifo_.pop();
+        } else {
+            unsigned old_inserted_domain_freq = freq_[domain]++;
+            unsigned old_popped_domain_freq = freq_[popped]--;
 
-        insert( domain );
-        pop();
+            double old_inserted_domain_metric = domain_metric( old_inserted_domain_freq );
+            double old_popped_domain_metric = domain_metric( old_popped_domain_freq );
 
-        double new_inserted_domain_metric = domain_metric( freq_[domain] );
-        double new_popped_domain_metric = 0;
-        if( freq_.count( popped ) > 0 )
-            new_popped_domain_metric = domain_metric( freq_[popped] );
+            double new_inserted_domain_metric = domain_metric( old_inserted_domain_freq + 1 );
+            double new_popped_domain_metric = domain_metric( old_popped_domain_freq - 1 );
 
-        double delta_inserted = new_inserted_domain_metric - old_inserted_domain_metric;
-        double delta_popped = new_popped_domain_metric - old_popped_domain_metric;
-        current_metric_ += ( delta_inserted + delta_popped ) / log( dns_fifo_.size() );
-        if( current_metric_ < 1e-20 ) {
-            current_metric_ = fifo_metric();
+            double delta_inserted = new_inserted_domain_metric - old_inserted_domain_metric;
+            double delta_popped = new_popped_domain_metric - old_popped_domain_metric;
+
+            current_metric_ += ( delta_inserted + delta_popped ) / log( dns_fifo_.size() );
+
+            dns_fifo_.push( domain );
+            dns_fifo_.pop();
+            if( old_popped_domain_freq == 1 )
+                freq_.erase( popped );
         }
 
+        if( current_metric_ < 1e-20 )
+            current_metric_ = fifo_metric();
         unsigned distribution_bin = static_cast<unsigned>( floor( current_metric_ * dist_bins_ ) );
         ++distribution_[distribution_bin];
     }
