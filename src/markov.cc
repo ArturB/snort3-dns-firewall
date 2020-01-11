@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <armadillo>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -16,6 +17,7 @@
 extern char* optarg;
 
 using namespace std;
+using namespace arma;
 
 // Runtime options of the program
 class ProgramOptions
@@ -76,6 +78,11 @@ int main( int argc, char* const argv[] )
     cout << "Output file name = " << options.output_filename_ << endl;
 
     cout << "Processing data..." << endl;
+
+    mat A = randu<mat>( 4, 5 );
+    mat B = randu<mat>( 4, 5 );
+
+    cout << A * B.t() << endl;
 
     return 0;
 }
