@@ -1,9 +1,0 @@
-snort4*
-bin/*
-.vscode/*
-
-data/*
-!data/.gitkeep
-
-outputs/*
-!outputs/.gitkeep
