@@ -7,35 +7,62 @@ Standard: Cpp11
 
 # Indentation
 AccessModifierOffset: -2
+ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth: 2
 IndentCaseLabels: false
 IndentPPDirectives: AfterHash
 IndentWidth: 4
-IndentWrappedFunctionNames: true
+IndentWrappedFunctionNames: false
 NamespaceIndentation: None
 
-# Breaking lines
-AlwaysBreakAfterDefinitionReturnType: None
-AlwaysBreakAfterReturnType: None
-AlwaysBreakBeforeMultilineStrings: true
-BreakBeforeBraces: Linux
-BreakBeforeTernaryOperators: true
-BreakConstructorInitializers: BeforeComma
-BreakInheritanceList: BeforeComma
-BreakStringLiterals: true
-ColumnLimit: 128
-CompactNamespaces: true
-ReflowComments: true
+# Brace wrapping (newlines)
+BreakBeforeBraces: Custom
+BraceWrapping:
+    AfterCaseLabel: false
+    AfterClass: true
+    AfterControlStatement: false
+    AfterEnum: true
+    AfterFunction: true
+    AfterNamespace: true
+    AfterStruct: true
+    AfterUnion: true
+    AfterExternBlock: true
+    BeforeCatch: false
+    BeforeElse: false
+    IndentBraces: false
+    SplitEmptyFunction: true
+    SplitEmptyRecord: true
+    SplitEmptyNamespace: true
 
 # Single-liners
 AllowAllArgumentsOnNextLine: true
 AllowAllConstructorInitializersOnNextLine: true
-AllowAllParametersOfDeclarationOnNextLine: true
+AllowAllParametersOfDeclarationOnNextLine: false
 AllowShortBlocksOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: false
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLambdasOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
+
+# Breaking lines
+AlwaysBreakAfterReturnType: None
+AlwaysBreakBeforeMultilineStrings: true
+AlwaysBreakTemplateDeclarations: Yes
+BinPackArguments: true
+BinPackParameters: true
+BreakBeforeBinaryOperators: None
+BreakBeforeTernaryOperators: true
+BreakConstructorInitializers: BeforeComma
+BreakInheritanceList: BeforeComma
+BreakStringLiterals: true
+ColumnLimit: 96
+CompactNamespaces: true
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+ExperimentalAutoDetectBinPacking: false
+KeepEmptyLinesAtTheStartOfBlocks: true
+MaxEmptyLinesToKeep: 1
+ReflowComments: true
 
 # Alignment
 AlignAfterOpenBracket: Align
@@ -45,6 +72,10 @@ AlignConsecutiveDeclarations: false
 AlignEscapedNewlines: Left
 AlignOperands: true
 AlignTrailingComments: true
+
+# Pointer style
+DerivePointerAlignment: false
+PointerAlignment: Left
 
 # Spaces
 SpaceAfterCStyleCast: true
@@ -64,18 +95,12 @@ SpacesInContainerLiterals: true
 SpacesInParentheses: true
 SpacesInSquareBrackets: false
 
-# Pointer style
-PointerAlignment: Left
-
-# Sort
+# Sorting
 IncludeBlocks: Preserve
 SortIncludes: true
 SortUsingDeclarations: true
 
 # Other
-BinPackArguments: false
-BinPackParameters: false
+Cpp11BracedListStyle: false
 FixNamespaceComments: true
-KeepEmptyLinesAtTheStartOfBlocks: false
-MaxEmptyLinesToKeep: 1
 UseTab: Never

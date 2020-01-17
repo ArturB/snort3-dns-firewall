@@ -1,5 +1,4 @@
 #!/bin/sh
-# Convenience wrapper for easily managing cmake configuration
 
 set -e
 
@@ -12,15 +11,8 @@ use this configure script to access CMake equivalent functionality.\
     exit 1;
 }
 
-usage="\
-Usage: $0 [OPTION]... [VAR=VALUE]...
-
-        --builddir=   The build directory
-"
-
-sourcedir="$( cd "$( dirname "$0" )" && pwd )"
-
 # set defaults
+sourcedir="$( cd "$( dirname "$0" )" && pwd )"
 builddir=build
 prefix=/usr/local/snort
 

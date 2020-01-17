@@ -1,3 +1,18 @@
+// **********************************************************************
+// Copyright (c) Artur M. Brodzki 2019-2020. All rights reserved.
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// **********************************************************************
+
+
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
@@ -118,7 +133,7 @@ class DnsShiftWindow
             return 0.0;
         } else {
             double domain_freq = double( domain_val ) / double( dns_fifo_size_ );
-            
+
             return -1 * domain_freq * log( domain_freq );
         }
     }
@@ -158,25 +173,25 @@ class DnsShiftWindow
     void forward_shift( const string& domain ) // 53 cycles
     {
         string popped = dns_fifo_.front(); // 20 cycles
-        
+
         if( domain == popped ) { // 4 cycles
             dns_fifo_.push( domain ); // 50 cycles
             dns_fifo_.pop();          // 50 cycles
         } else  {
             unsigned old_inserted_domain_freq = freq_[domain]++; // 140 cycles
             unsigned old_popped_domain_freq = freq_[popped]--;   // 140 cycles
-            
+
             double old_inserted_domain_metric = domain_metric( old_inserted_domain_freq ); // 40 cycles
             double old_popped_domain_metric = domain_metric( old_popped_domain_freq );     // 40 cycles
-            
+
             double new_inserted_domain_metric = domain_metric( old_inserted_domain_freq + 1 ); // 40 cycles
             double new_popped_domain_metric = domain_metric( old_popped_domain_freq - 1 );     // 40 cycles
-            
+
             double delta_inserted = new_inserted_domain_metric - old_inserted_domain_metric;  // 4 cycles
             double delta_popped = new_popped_domain_metric - old_popped_domain_metric;        // 4 cycles
 
             current_metric_ += ( delta_inserted + delta_popped ) / log( dns_fifo_size_ );     // 3 cycles
-            
+
             dns_fifo_.push( domain );  // 50 cycles
             dns_fifo_.pop();           // 50 cycles
 
@@ -187,10 +202,10 @@ class DnsShiftWindow
         if( current_metric_ < 1e-10 ) {
             current_metric_ = fifo_metric();
         }
-        
+
         unsigned distribution_bin = floor( current_metric_ * dist_bins_ ); // 3 cycles
         ++distribution_[distribution_bin]; // 3 cycles
-        
+
     }
 
     // Save distribution to file
