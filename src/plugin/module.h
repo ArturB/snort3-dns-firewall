@@ -27,11 +27,6 @@ namespace DnsFirewall
 
 static THREAD_LOCAL ProfileStats dns_tunnel_perf_stats;
 
-static const Parameter module_params[] = {
-    { "message", Parameter::PT_STRING, "default_dns_message", nullptr, "DNS message" },
-    { nullptr, Parameter::PT_MAX, nullptr, nullptr, nullptr }
-};
-
 class Module : public snort::Module
 {
   public:

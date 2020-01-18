@@ -21,6 +21,12 @@ namespace snort
 namespace DnsFirewall
 {
 
+static const Parameter module_params[] = {
+    { "enabled", Parameter::PT_BOOL, nullptr, nullptr, "DNS firewall enabled" },
+    { "message", Parameter::PT_STRING, nullptr, nullptr, "DNS message" },
+    { nullptr, Parameter::PT_MAX, nullptr, nullptr, nullptr }
+};
+
 Module::Module()
     : snort::Module( module_name, module_help, module_params )
 {
@@ -28,7 +34,6 @@ Module::Module()
 
 bool Module::begin( const char*, int, SnortConfig* )
 {
-    std::cout << "dns_firewall: begin" << std::endl;
     return true;
 }
 
@@ -44,7 +49,7 @@ bool Module::set( const char*, Value& v, SnortConfig* )
         }
     } else if( v.is( "message" ) ) {
         config_.message_ = v.get_string();
-        std::cout << "dns_firewall: message = " << config_.message_ << std::endl;
+        std::cout << "dns_firewall: message = " << v.get_string() << std::endl;
     } else {
         return false;
     }
