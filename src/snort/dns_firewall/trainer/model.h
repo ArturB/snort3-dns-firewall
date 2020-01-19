@@ -1,5 +1,5 @@
 // **********************************************************************
-// Copyright (c) <AUTHOR_NAME> 2019-2020. All rights reserved.
+// Copyright (c) Artur M. Brodzki 2019-2020. All rights reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,35 +12,18 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
-#ifndef SNORT_DNS_FIREWALL_IPS_OPTION_H
-#define SNORT_DNS_FIREWALL_IPS_OPTION_H
-
-#include "config.h"
-#include <framework/ips_option.h>
-#include <iostream>
+#ifndef SNORT_DNS_FIREWALL_TRAINER_MODEL_H
+#define SNORT_DNS_FIREWALL_TRAINER_MODEL_H
 
 namespace snort
 {
-namespace DnsFirewall
+namespace dns_firewall
+{
+namespace trainer
 {
 
-static const char* module_name = "dns_firewall";
-static const char* module_help = "alert on suspicious DNS queries activity";
-
-class Option : public IpsOption
-{
-  private:
-    Config config_;
-
-  public:
-    explicit Option( const Config& );
-    bool operator==( const Option& ) const;
-
-    uint32_t hash() const override;
-    EvalStatus eval( Cursor&, Packet* ) override;
-};
-
-} // namespace DnsFirewall
+}
+} // namespace dns_firewall
 } // namespace snort
 
-#endif // SNORT_DNS_FIREWALL_IPS_OPTION_H
+#endif // SNORT_DNS_FIREWALL_TRAINER_MODEL_H

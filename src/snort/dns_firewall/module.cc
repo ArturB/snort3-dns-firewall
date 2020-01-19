@@ -13,12 +13,12 @@
 // **********************************************************************
 
 #include "module.h"
-#include "option.h"
-#include "profiler/profiler.h"
+#include "ips_option.h"
+#include <profiler/profiler.h>
 
 namespace snort
 {
-namespace DnsFirewall
+namespace dns_firewall
 {
 
 static const Parameter module_params[] = {
@@ -72,5 +72,5 @@ Module::Usage Module::get_usage() const
     return DETECT;
 }
 
-} // namespace DnsFirewall
+} // namespace dns_firewall
 } // namespace snort

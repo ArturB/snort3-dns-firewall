@@ -1,5 +1,5 @@
 // **********************************************************************
-// Copyright (c) <AUTHOR_NAME> 2019-2020. All rights reserved.
+// Copyright (c) Artur M. Brodzki 2019-2020. All rights reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,29 +12,35 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
+#ifndef SNORT_DNS_FIREWALL_OPTION_H
+#define SNORT_DNS_FIREWALL_OPTION_H
+
 #include "config.h"
+#include <framework/ips_option.h>
+#include <iostream>
 
 namespace snort
 {
-namespace DnsFirewall
+namespace dns_firewall
 {
 
-Config::Config()
-    : enabled_( true )
-    , message_( "Default DNS Firewall message!" )
-{
-}
+static const char* module_name = "dns_firewall";
+static const char* module_help = "alert on suspicious DNS queries activity";
 
-Config::Config( bool enabled, const std::string& message )
-    : enabled_( enabled )
-    , message_( message )
+class IpsOption : public snort::IpsOption
 {
-}
+  private:
+    Config config_;
 
-bool Config::operator==( const Config& operand2 ) const
-{
-    return enabled_ == operand2.enabled_ and message_ == operand2.message_;
-}
+  public:
+    explicit IpsOption( const Config& );
+    bool operator==( const IpsOption& ) const;
 
-} // namespace DnsFirewall
+    uint32_t hash() const override;
+    EvalStatus eval( Cursor&, Packet* ) override;
+};
+
+} // namespace dns_firewall
 } // namespace snort
+
+#endif // SNORT_DNS_FIREWALL_IPS_OPTION_H

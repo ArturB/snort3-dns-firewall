@@ -1,3 +1,17 @@
+# **********************************************************************
+# Copyright (c) Artur M. Brodzki 2019-2020. All rights reserved.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# **********************************************************************
+
 cmake_minimum_required ( VERSION 3.4.3 )
 
 project( dns-firewall CXX C )
@@ -33,9 +47,9 @@ add_subdirectory ( src )
 
 # Output dirs
 set(CMAKE_INSTALL_PREFIX "/usr/local")
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
 # CPack configuration
 set (CPACK_GENERATOR TGZ)
@@ -57,14 +71,15 @@ ${CMAKE_PROJECT_NAME} version ${EXTRA_VERSION}
 
 Build type: ${CMAKE_BUILD_TYPE}
 
+Build output options:
+    ARCH_OUT:  ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
+    LIBR_OUT:  ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+    RUNT_OUT:  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+
 Install options:
     RUNT_DIR:  ${CMAKE_INSTALL_PREFIX}/bin/${CMAKE_PROJECT_NAME}
     LIBR_DIR:  ${CMAKE_INSTALL_PREFIX}/lib64/snort/${CMAKE_PROJECT_NAME}
     INCL_DIR:  ${CMAKE_INSTALL_PREFIX}/include/snort/${CMAKE_PROJECT_NAME}
-
-    ARCH_OUT:  ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
-    LIBR_OUT:  ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-    RUNT_OUT:  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 
 Compiler options:
     CXX:            ${CMAKE_CXX_COMPILER}

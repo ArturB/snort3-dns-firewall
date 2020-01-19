@@ -1,5 +1,9 @@
+bin/*
+!bin/.gitkeep
+
 build/*
 !build/.gitkeep
-.vscode
 
 script/*
+
+.vscode

@@ -1,5 +1,5 @@
 // **********************************************************************
-// Copyright (c) <AUTHOR_NAME> 2019-2020. All rights reserved.
+// Copyright (c) Artur M. Brodzki 2019-2020. All rights reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,28 +12,12 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
-#ifndef SNORT_DNS_FIREWALL_CONFIG_H
-#define SNORT_DNS_FIREWALL_CONFIG_H
-
-#include <string>
+#include "dns_codec.h"
 
 namespace snort
 {
-namespace DnsFirewall
+namespace dns_firewall
 {
-class Config
-{
-  public:
-    bool enabled_;
-    std::string message_;
 
-  public:
-    Config();
-    Config( bool, const std::string& );
-    bool operator==( const Config& ) const;
-};
-
-} // namespace DnsFirewall
+}
 } // namespace snort
-
-#endif // SNORT_DNS_FIREWALL_CONFIG_H

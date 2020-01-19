@@ -1,5 +1,5 @@
 // **********************************************************************
-// Copyright (c) <AUTHOR_NAME> 2019-2020. All rights reserved.
+// Copyright (c) Artur M. Brodzki 2019-2020. All rights reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -11,3 +11,16 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 // **********************************************************************
+
+#ifndef SNORT_DNS_FIREWALL_DNS_CODEC_H
+#define SNORT_DNS_FIREWALL_DNS_CODEC_H
+
+namespace snort
+{
+namespace dns_firewall
+{
+
+}
+} // namespace snort
+
+#endif // SNORT_DNS_FIREWALL_DNS_CODEC_H

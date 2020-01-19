@@ -1,5 +1,5 @@
 // **********************************************************************
-// Copyright (c) <AUTHOR_NAME> 2019-2020. All rights reserved.
+// Copyright (c) Artur M. Brodzki 2019-2020. All rights reserved.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,30 +12,30 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
-#include "option.h"
+#include "ips_option.h"
 
 namespace snort
 {
-namespace DnsFirewall
+namespace dns_firewall
 {
 
-Option::Option( const Config& config )
+dns_firewall::IpsOption::IpsOption( const Config& config )
     : config_( config )
-    , IpsOption( module_name )
+    , snort::IpsOption( module_name )
 {
 }
 
-uint32_t Option::hash() const
+uint32_t dns_firewall::IpsOption::hash() const
 {
     return 3984583;
 }
 
-bool Option::operator==( const Option& operand2 ) const
+bool dns_firewall::IpsOption::operator==( const dns_firewall::IpsOption& operand2 ) const
 {
     return config_ == operand2.config_;
 }
 
-IpsOption::EvalStatus Option::eval( Cursor&, Packet* p )
+snort::IpsOption::EvalStatus dns_firewall::IpsOption::eval( Cursor&, Packet* p )
 {
     if( config_.enabled_ ) {
         std::cout << config_.message_ << std::endl;
@@ -45,5 +45,5 @@ IpsOption::EvalStatus Option::eval( Cursor&, Packet* p )
     }
 }
 
-} // namespace DnsFirewall
+} // namespace dns_firewall
 } // namespace snort

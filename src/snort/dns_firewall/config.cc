@@ -12,38 +12,29 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
-#ifndef SNORT_DNS_FIREWALL_MODULE_H
-#define SNORT_DNS_FIREWALL_MODULE_H
-
-#include "option.h"
-#include "profiler/profiler.h"
-#include <framework/module.h>
-#include <iostream>
+#include "config.h"
 
 namespace snort
 {
-namespace DnsFirewall
+namespace dns_firewall
 {
 
-static THREAD_LOCAL ProfileStats dns_tunnel_perf_stats;
-
-class Module : public snort::Module
+Config::Config()
+    : enabled_( true )
+    , message_( "Default DNS Firewall message!" )
 {
-  public:
-    Config config_;
+}
 
-  public:
-    Module();
+Config::Config( bool enabled, const std::string& message )
+    : enabled_( enabled )
+    , message_( message )
+{
+}
 
-    bool begin( const char*, int, SnortConfig* ) override;
-    bool set( const char*, Value& v, SnortConfig* ) override;
-    bool end( const char*, int, SnortConfig* ) override;
+bool Config::operator==( const Config& operand2 ) const
+{
+    return enabled_ == operand2.enabled_ and message_ == operand2.message_;
+}
 
-    ProfileStats* get_profile() const override;
-    Usage get_usage() const override;
-};
-
-} // namespace DnsFirewall
+} // namespace dns_firewall
 } // namespace snort
-
-#endif // SNORT_DNS_FIREWALL_MODULE_H
