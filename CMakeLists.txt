@@ -23,8 +23,18 @@ set (CMAKE_CXX_STANDARD 11)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Necessary includes
+set(CMAKE_MODULE_PATH
+    ${CMAKE_MODULE_PATH}
+    ${CMAKE_SOURCE_DIR}/cmake
+)
 include(CPack)
 include(CheckCXXCompilerFlag)
+include(RequireLibrary)
+
+# Check binary dependencies
+require_library(openblas "")
+require_library(armadillo "")
+require_library(yaml-cpp "")
 
 # Debug and release build
 option ( ENABLE_DEBUG "Enable debugging options (bugreports and developers only)" OFF )
@@ -67,7 +77,6 @@ set (CPACK_SOURCE_GENERATOR TGZ)
 # Print configuration flags
 message("
 -------------------------------------------------------
-${CMAKE_PROJECT_NAME} version ${EXTRA_VERSION}
 
 Build type: ${CMAKE_BUILD_TYPE}
 

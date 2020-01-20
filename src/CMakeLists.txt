@@ -27,6 +27,10 @@ add_library (
         snort/dns_firewall/module.cc
         snort/dns_firewall/plugin.cc
 )
+target_link_libraries(
+    dnsfirewall
+    yaml-cpp
+)
 install (
     TARGETS dnsfirewall
     LIBRARY DESTINATION "lib64/snort/${CMAKE_PROJECT_NAME}"
@@ -43,4 +47,8 @@ add_executable(
 install (
     TARGETS snort3trainer
     RUNTIME DESTINATION "lib64/snort/${CMAKE_PROJECT_NAME}"
+)
+install (
+    FILES config.yaml
+    DESTINATION "/etc/snort/dns-firewall"
 )
