@@ -1,6 +1,6 @@
 plugin:
     mode: simple
-    model-file: model-plugin.snort3model
+    model-file: bin/model.snort3model
     whitelist: ""
     blacklist: ""
     length:
@@ -24,8 +24,8 @@ plugin:
         repetitions: 10
 
 trainer:
-    dataset: rb.log
-    model-file: model-trainer.snort3model
+    dataset: data/rb-domains.log
+    model-file: bin/model.snort3model
     max-lines: -1
     hmm:
         hidden-states: 10

@@ -13,3 +13,33 @@
 // **********************************************************************
 
 #include "model.h"
+#include <cereal/archives/binary.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/types/unordered_map.hpp>
+#include <cereal/types/vector.hpp>
+#include <fstream>
+#include <unordered_map>
+
+namespace snort
+{
+namespace dns_firewall
+{
+
+void Model::save( std::string filename )
+{
+    std::ofstream fs( filename );
+    cereal::BinaryOutputArchive oarchive( fs );
+    oarchive( bins, entropy_distribution );
+    fs.close();
+}
+
+void Model::load( std::string filename )
+{
+    std::ifstream fs( filename );
+    cereal::BinaryInputArchive iarchive( fs );
+    iarchive( bins, entropy_distribution );
+    fs.close();
+}
+
+} // namespace dns_firewall
+} // namespace snort

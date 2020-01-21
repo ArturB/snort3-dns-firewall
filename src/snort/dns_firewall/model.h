@@ -16,22 +16,23 @@
 #define SNORT_DNS_FIREWALL_TRAINER_MODEL_H
 
 #include <unordered_map>
+#include <vector>
 
 namespace snort
 {
 namespace dns_firewall
 {
-namespace trainer
-{
 
 class Model
 {
  public:
+    unsigned bins;
     std::unordered_map<unsigned, std::vector<double>> entropy_distribution;
-    
-}
 
-} // namespace trainer
+    void save( std::string filename );
+    void load( std::string filename );
+};
+
 } // namespace dns_firewall
 } // namespace snort
 

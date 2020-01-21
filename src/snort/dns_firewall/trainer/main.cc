@@ -12,6 +12,7 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
+#include "model.h"
 #include "trainer/config.h"
 #include "trainer/entropy/line_processor.h"
 #include "trainer/hmm/line_processor.h"
@@ -22,6 +23,7 @@
 #include <fstream>
 #include <getopt.h>
 #include <iostream>
+#include <locale>
 #include <queue>
 #include <set>
 #include <sstream>
@@ -36,7 +38,7 @@ using namespace snort::dns_firewall::trainer;
 // Get x-level suffix of DNS domain from string
 // e.g. for GetDnsFld(s2.smtp.google.com, 2) function returns google.com
 // dont work for empty string
-static std::string GetDnsFld( const std::string& domain, unsigned level )
+static std::string get_dns_xld( const std::string& domain, unsigned level )
 {
     char delimiter             = '.';
     unsigned delimiters_passed = 0;
@@ -55,43 +57,62 @@ static std::string GetDnsFld( const std::string& domain, unsigned level )
 // ----------------
 int main( int argc, char* const argv[] )
 {
-    // // Load and print program options
-    // std::cout << "snort4gini 0.1.1 by Artur M. Brodzki" << std::endl;
-    // trainer::GetoptParser options = trainer::GetoptParser( argc, argv );
+    // Load and print program options
+    std::cout << "snort3trainer 0.1.1 by Artur M. Brodzki" << std::endl;
+    Config options = Config( "etc/snort/dns-firewall/config.yaml" );
 
-    // std::cout << "Dataset file name = " << options.data_filename_ << std::endl;
-    // std::cout << "Window size = " << options.window_size_ << std::endl;
-    // std::cout << "Distribution Bins = " << options.bins_ << std::endl;
-    // std::cout << "Output file name = " << options.output_filename_ << std::endl;
-    // if( options.log_distribution_ )
-    //     std::cout << "Generating log-scale distribution..." << std::endl;
+    std::cout << std::endl << "Dataset file name = " << options.dataset << std::endl;
+    std::cout << "Window sizes = ";
+    for( unsigned i = 0; i < options.entropy.window_widths.size(); ++i ) {
+        std::cout << options.entropy.window_widths[i] << " ";
+    }
+    std::cout << std::endl;
+    std::cout << "Distribution Bins = " << options.entropy.bins << std::endl;
+    std::cout << "Output file name = " << options.model_file << std::endl;
+    if( options.entropy.log_scale )
+        std::cout << std::endl << "Generating log-scale distribution..." << std::endl;
 
-    // std::cout << "Processing data..." << std::endl;
+    // Create line_processor objects
+    std::vector<entropy::LineProcessor> fifos;
+    for( unsigned i = 0; i < options.entropy.window_widths.size(); ++i ) {
+        fifos.push_back(
+          entropy::LineProcessor( options.entropy.window_widths[i], options.entropy.bins ) );
+    }
 
-    // // Process data line by line
-    // std::ifstream dataset_file( options.data_filename_ );
-    // std::string line;
-    // unsigned processed_lines = 0;
-    // trainer::entropy::LineProcessor window( options.bins_ );
+    // Process data line by line
+    std::ifstream dataset_file( options.dataset );
+    std::string line;
+    unsigned processed_lines = 0;
 
-    // while( getline( dataset_file, line ) && processed_lines < options.max_lines_ ) {
-    //     if( line.empty() )
-    //         continue;
-    //     else if( processed_lines <= options.window_size_ ) {
-    //         window.insert( GetDnsFld( line, 2 ) );
-    //     } else {
-    //         window.forward_shift( GetDnsFld( line, 2 ) );
-    //     }
-    //     ++processed_lines;
-    // }
+    std::cout.imbue( std::locale( "" ) );
+    while( getline( dataset_file, line ) && processed_lines < options.max_lines ) {
+        if( line.empty() ) {
+            continue;
+        } else {
+            std::string xld = get_dns_xld( line, 2 );
+            for( unsigned i = 0; i < fifos.size(); ++i ) {
+                fifos[i].process_line( xld );
+            }
+        }
+        ++processed_lines;
+        if( processed_lines % 1024 == 0 ) {
+            std::cout << "Processed lines: " << processed_lines << '\r' << std::flush;
+        }
+    }
 
-    // // Save result distribution to file
-    // window.save_distribution( options.output_filename_, options.log_distribution_ );
-    // std::cout << "Distribution saved to " << options.output_filename_ << "!" << std::endl;
-    // std::cout << "Processed lines: " << processed_lines << std::endl;
+    // Create model file
+    snort::dns_firewall::Model model;
+    for( unsigned i = 0; i < fifos.size(); ++i ) {
+        unsigned win_width = fifos[i].get_window_width();
+        model.entropy_distribution[win_width] =
+          fifos[i].get_distribution( options.entropy.log_scale );
+        // std::ofstream graph()
+    }
 
-    Config config = Config( "etc/snort/dns-firewall/config.yaml" );
-    std::cout << config.entropy.log_scale << std::endl;
+    // Save result distribution to file
+    model.save( options.model_file );
+    std::cout << "Distribution saved to " << options.model_file << "!" << std::endl;
+    std::cout << "Processed lines: " << processed_lines << std::endl;
 
     return 0;
 }

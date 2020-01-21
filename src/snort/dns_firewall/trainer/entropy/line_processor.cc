@@ -23,12 +23,14 @@ namespace trainer
 namespace entropy
 {
 
-LineProcessor::LineProcessor( unsigned bins )
+LineProcessor::LineProcessor( unsigned window_width, unsigned bins )
     : dns_fifo_size_( 0 )
+    , window_width_( window_width )
     , distribution_( bins, 0 )
+    , dist_bins_( bins )
+    , current_metric_( 0 )
+    , processed_lines_( 0 )
 {
-    dist_bins_ = bins;
-    current_metric_ = 0.0;
 }
 
 // Calculates given metric for one domain
@@ -86,7 +88,7 @@ void LineProcessor::forward_shift( const std::string& domain ) // 53 cycles
         dns_fifo_.pop();          // 50 cycles
     } else {
         unsigned old_inserted_domain_freq = freq_[domain]++; // 140 cycles
-        unsigned old_popped_domain_freq = freq_[popped]--;   // 140 cycles
+        unsigned old_popped_domain_freq   = freq_[popped]--; // 140 cycles
 
         double old_inserted_domain_metric =
           domain_metric( old_inserted_domain_freq );                               // 40 cycles
@@ -119,11 +121,21 @@ void LineProcessor::forward_shift( const std::string& domain ) // 53 cycles
     ++distribution_[distribution_bin];                                 // 3 cycles
 }
 
+void LineProcessor::process_line( const std::string& domain )
+{
+    if( processed_lines_ < window_width_ ) {
+        insert( domain );
+    } else {
+        forward_shift( domain );
+    }
+    ++processed_lines_;
+}
+
 // Save distribution to file
-void LineProcessor::save_distribution( const std::string& file_name, bool log ) const
+std::vector<double> LineProcessor::get_distribution( bool log ) const
 {
     std::vector<double> distribution_values = std::vector<double>( dist_bins_, 0 );
-    unsigned observations_count = 0;
+    unsigned observations_count             = 0;
     for( unsigned i = 0; i < dist_bins_; ++i ) {
         observations_count += distribution_[i];
     }
@@ -142,10 +154,12 @@ void LineProcessor::save_distribution( const std::string& file_name, bool log ) 
         }
     }
 
-    std::ofstream output_file( file_name );
-    for( unsigned i = 0; i < dist_bins_; ++i ) {
-        output_file << distribution_values[i] << std::endl;
-    }
+    return distribution_values;
+}
+
+unsigned LineProcessor::get_window_width() const
+{
+    return dns_fifo_size_;
 }
 
 } // namespace entropy

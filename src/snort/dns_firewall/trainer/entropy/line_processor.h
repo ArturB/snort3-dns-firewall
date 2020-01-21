@@ -41,20 +41,21 @@ namespace entropy
 
 class LineProcessor
 {
-  public:
-    std::queue<std::string> dns_fifo_;          // FIFO queue of processed domains
-    unsigned dns_fifo_size_;                    // Memoized size of above FIFO queue
+ private:
+    double current_metric_;                          // Memoized concentration metric
+    unsigned dist_bins_;                             // Number of bins in metrics distribution
+    std::queue<std::string> dns_fifo_;               // FIFO queue of processed domains
+    unsigned dns_fifo_size_;                         // Memoized size of above FIFO queue
+    unsigned window_width_;                          // Target window width
+    unsigned processed_lines_;                       // Number of lines processed so far
     std::unordered_map<std::string, unsigned> freq_; // Mapping from domain to its frequencies
-    double current_metric_;                     // Memoized concentration metric
+
+ public:
     std::vector<unsigned>
-      distribution_;     // Probability distribution of metrics,
-                         // stored as number of observations for distribution bins
-    unsigned dist_bins_; // Number of bins in metrics distribution
+      distribution_; // Probability distribution of metrics,
+                     // stored as number of observations for distribution bins
 
-  public:
-    // Default constructor
-    explicit LineProcessor( unsigned );
-
+ private:
     // Calculates given metric for one domain
     double domain_metric( unsigned ) const;
 
@@ -72,8 +73,19 @@ class LineProcessor
     // Shift window to new domain
     void forward_shift( const std::string& );
 
-    // Save distribution to file
-    void save_distribution( const std::string&, bool ) const;
+ public:
+    // Default constructor
+    explicit LineProcessor( unsigned, unsigned );
+
+    // Process DNS line
+    void process_line( const std::string& );
+
+    // Get distribution vector
+    std::vector<double> get_distribution( bool ) const;
+
+    // Get current window width
+    unsigned get_window_width() const;
+
 }; // namespace trainerclassLineProcessor
 
 } // namespace entropy

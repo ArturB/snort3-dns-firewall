@@ -43,6 +43,7 @@ install (
 
 add_executable(
     snort3trainer
+        snort/dns_firewall/model.cc
         snort/dns_firewall/trainer/config.cc
         snort/dns_firewall/trainer/main.cc
         snort/dns_firewall/trainer/entropy/line_processor.cc
