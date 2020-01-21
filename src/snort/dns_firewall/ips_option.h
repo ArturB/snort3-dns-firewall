@@ -30,10 +30,10 @@ static const char* module_help = "alert on suspicious DNS queries activity";
 class IpsOption : public snort::IpsOption
 {
   private:
-    Config config_;
+    //Config config_;
 
   public:
-    explicit IpsOption( const Config& );
+    IpsOption( );
     bool operator==( const IpsOption& ) const;
 
     uint32_t hash() const override;

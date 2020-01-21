@@ -12,36 +12,4 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
-#include "ips_option.h"
-
-namespace snort
-{
-namespace dns_firewall
-{
-
-dns_firewall::IpsOption::IpsOption( )
-    : snort::IpsOption( module_name )
-{
-}
-
-uint32_t dns_firewall::IpsOption::hash() const
-{
-    return 3984583;
-}
-
-bool dns_firewall::IpsOption::operator==( const dns_firewall::IpsOption& operand2 ) const
-{
-    return true;
-}
-
-snort::IpsOption::EvalStatus dns_firewall::IpsOption::eval( Cursor&, Packet* p )
-{
-    if( true ) {
-        return MATCH;
-    } else {
-        return NO_MATCH;
-    }
-}
-
-} // namespace dns_firewall
-} // namespace snort
+#include "dns_classifier.h"

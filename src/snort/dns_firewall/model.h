@@ -12,38 +12,27 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
-#ifndef SNORT_DNS_FIREWALL_MODULE_H
-#define SNORT_DNS_FIREWALL_MODULE_H
+#ifndef SNORT_DNS_FIREWALL_TRAINER_MODEL_H
+#define SNORT_DNS_FIREWALL_TRAINER_MODEL_H
 
-#include "ips_option.h"
-#include "profiler/profiler.h"
-#include <framework/module.h>
-#include <iostream>
+#include <unordered_map>
 
 namespace snort
 {
 namespace dns_firewall
 {
-
-static THREAD_LOCAL ProfileStats dns_tunnel_perf_stats;
-
-class Module : public snort::Module
+namespace trainer
 {
-  public:
-    //Config config_;
 
-  public:
-    Module();
+class Model
+{
+ public:
+    std::unordered_map<unsigned, std::vector<double>> entropy_distribution;
+    
+}
 
-    bool begin( const char*, int, SnortConfig* ) override;
-    bool set( const char*, Value& v, SnortConfig* ) override;
-    bool end( const char*, int, SnortConfig* ) override;
-
-    ProfileStats* get_profile() const override;
-    Usage get_usage() const override;
-};
-
+} // namespace trainer
 } // namespace dns_firewall
 } // namespace snort
 
-#endif // SNORT_DNS_FIREWALL_MODULE_H
+#endif // SNORT_DNS_FIREWALL_TRAINER_MODEL_H

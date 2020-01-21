@@ -1,4 +1,4 @@
-// **********************************************************************
+/// **********************************************************************
 // Copyright (c) Artur M. Brodzki 2019-2020. All rights reserved.
 //
 // This program is free software: you can redistribute it and/or modify
@@ -12,36 +12,22 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
-#include "ips_option.h"
+#ifndef SNORT_DNS_FIREWALL_HMM_DNS_CLASSIFIER_H
+#define SNORT_DNS_FIREWALL_HMM_DNS_CLASSIFIER_H
 
 namespace snort
 {
-namespace dns_firewall
+namespace dns_classifier
+{
+namespace hmm
 {
 
-dns_firewall::IpsOption::IpsOption( )
-    : snort::IpsOption( module_name )
+class DnsClassifier
 {
-}
+};
 
-uint32_t dns_firewall::IpsOption::hash() const
-{
-    return 3984583;
-}
-
-bool dns_firewall::IpsOption::operator==( const dns_firewall::IpsOption& operand2 ) const
-{
-    return true;
-}
-
-snort::IpsOption::EvalStatus dns_firewall::IpsOption::eval( Cursor&, Packet* p )
-{
-    if( true ) {
-        return MATCH;
-    } else {
-        return NO_MATCH;
-    }
-}
-
-} // namespace dns_firewall
+} // namespace hmm
+} // namespace dns_classifier
 } // namespace snort
+
+#endif // SNORT_DNS_FIREWALL_HMM_DNS_CLASSIFIER_H

@@ -6,7 +6,7 @@ Language: Cpp
 Standard: Cpp11
 
 # Indentation
-AccessModifierOffset: -2
+AccessModifierOffset: -3
 ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth: 2
 IndentCaseLabels: false
@@ -67,7 +67,7 @@ ReflowComments: true
 # Alignment
 AlignAfterOpenBracket: Align
 AlignConsecutiveMacros: false
-AlignConsecutiveAssignments: false
+AlignConsecutiveAssignments: true
 AlignConsecutiveDeclarations: false
 AlignEscapedNewlines: Left
 AlignOperands: true

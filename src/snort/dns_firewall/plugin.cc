@@ -30,8 +30,8 @@ static void mod_dtor( Module* m )
 
 static snort::IpsOption* option_ctor( Module* p, OptTreeNode* )
 {
-    dns_firewall::Module* m = (dns_firewall::Module*) p;
-    return new dns_firewall::IpsOption( m->config_ );
+    //dns_firewall::Module* m = (dns_firewall::Module*) p;
+    return new dns_firewall::IpsOption( );
 }
 
 static void option_dtor( IpsOption* p )

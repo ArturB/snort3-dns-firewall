@@ -1,0 +1,37 @@
+plugin:
+    mode: simple
+    model-file: model-plugin.snort3model
+    whitelist: ""
+    blacklist: ""
+    length:
+        min-length: 3
+        max-length: 25
+        max-length-penalty: 1
+    hmm:
+        weight: 10
+    entropy:
+        weight: 10
+    short-reject:
+        block-period: 5
+        threshold: -3
+        repetitions: 1
+    long-reject:
+        block-period: 60
+        threshold: -5
+        repetitions: 5
+    permanent-reject:
+        threshold: -6
+        repetitions: 10
+
+trainer:
+    dataset: rb.log
+    model-file: model-trainer.snort3model
+    max-lines: -1
+    hmm:
+        hidden-states: 10
+    entropy:
+        bins: 1000
+        log-scale: true
+        window-widths: [
+            30,100,300,1000
+        ]

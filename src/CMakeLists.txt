@@ -23,12 +23,17 @@ include_directories(
 add_library (
     dnsfirewall MODULE
         snort/dns_firewall/config.cc
+        snort/dns_firewall/dns_codec.cc
         snort/dns_firewall/ips_option.cc
+        snort/dns_firewall/model.cc
         snort/dns_firewall/module.cc
         snort/dns_firewall/plugin.cc
+        snort/dns_firewall/entropy/dns_classifier.cc
+        snort/dns_firewall/hmm/dns_classifier.cc
 )
 target_link_libraries(
     dnsfirewall
+    armadillo
     yaml-cpp
 )
 install (
@@ -38,11 +43,15 @@ install (
 
 add_executable(
     snort3trainer
+        snort/dns_firewall/trainer/config.cc
         snort/dns_firewall/trainer/main.cc
-        snort/dns_firewall/trainer/getopt_parser.cc
-        snort/dns_firewall/trainer/model.cc
-        snort/dns_firewall/trainer/hmm/line_processor.cc
         snort/dns_firewall/trainer/entropy/line_processor.cc
+        snort/dns_firewall/trainer/hmm/line_processor.cc
+)
+target_link_libraries(
+    snort3trainer
+    armadillo
+    yaml-cpp
 )
 install (
     TARGETS snort3trainer

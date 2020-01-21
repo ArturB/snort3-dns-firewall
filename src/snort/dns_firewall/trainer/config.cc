@@ -1,0 +1,64 @@
+// **********************************************************************
+// Copyright (c) Artur M. Brodzki 2019-2020. All rights reserved.
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// **********************************************************************
+
+#include "config.h"
+#include <yaml-cpp/yaml.h>
+
+namespace snort
+{
+namespace dns_firewall
+{
+namespace trainer
+{
+
+bool Config::EntropyConfig::operator==( const Config::EntropyConfig& operand2 ) const
+{
+    return bins == operand2.bins && log_scale == operand2.log_scale &&
+           window_widths == operand2.window_widths;
+}
+
+bool Config::HmmConfig::operator==( const Config::HmmConfig& operand2 ) const
+{
+    return hidden_states == operand2.hidden_states;
+}
+
+bool Config::operator==( const Config& operand2 ) const
+{
+    return dataset == operand2.dataset && model_file == operand2.model_file &&
+           max_lines == operand2.max_lines && hmm == operand2.hmm &&
+           entropy == operand2.entropy;
+}
+
+Config::Config( const std::string& config_filename )
+{
+    YAML::Node node = YAML::LoadFile( config_filename );
+
+    dataset    = node["trainer"]["dataset"].as<std::string>();
+    model_file = node["trainer"]["model-file"].as<std::string>();
+    max_lines  = node["trainer"]["max-lines"].as<int>();
+
+    hmm.hidden_states = node["trainer"]["hmm"]["hidden-states"].as<int>();
+
+    entropy.bins      = node["trainer"]["entropy"]["bins"].as<int>();
+    entropy.log_scale = node["trainer"]["entropy"]["log-scale"].as<bool>();
+
+    YAML::Node win_widths = node["trainer"]["entropy"]["window-widths"];
+    for( auto it = win_widths.begin(); it != win_widths.end(); ++it ) {
+        entropy.window_widths.push_back( it->as<int>() );
+    }
+}
+
+} // namespace trainer
+} // namespace dns_firewall
+} // namespace snort

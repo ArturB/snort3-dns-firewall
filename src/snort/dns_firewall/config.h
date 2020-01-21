@@ -16,6 +16,7 @@
 #define SNORT_DNS_FIREWALL_CONFIG_H
 
 #include <string>
+#include <vector>
 
 namespace snort
 {
@@ -24,13 +25,53 @@ namespace dns_firewall
 
 class Config
 {
-  public:
-    bool enabled_;
-    std::string message_;
+ public:
+    enum Mode
+    {
+        SIMPLE,
+        LIVE
+    };
+    class HmmConfig
+    {
+     public:
+        unsigned weight;
+        bool operator==( const HmmConfig& ) const;
+    };
+    class EntropyConfig
+    {
+     public:
+        unsigned weight;
+        bool operator==( const EntropyConfig& ) const;
+    };
+    class LengthConfig
+    {
+     public:
+        unsigned min_length;
+        unsigned max_length;
+        unsigned max_length_penalty;
+        bool operator==( const LengthConfig& ) const;
+    };
+    class RejectConfig
+    {
+     public:
+        unsigned block_period;
+        unsigned threshold;
+        unsigned repetitions;
+        bool operator==( const RejectConfig& ) const;
+    };
 
-  public:
-    Config();
-    Config( bool, const std::string& );
+    Mode mode;
+    std::string model_file;
+    std::string blacklist;
+    std::string whitelist;
+    HmmConfig hmm;
+    EntropyConfig entropy;
+    LengthConfig length;
+    RejectConfig short_reject;
+    RejectConfig long_reject;
+    RejectConfig permanent_reject;
+
+    explicit Config( const std::string& );
     bool operator==( const Config& ) const;
 };
 

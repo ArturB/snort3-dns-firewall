@@ -12,8 +12,11 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
-#ifndef SNORT_DNS_FIREWALL_TRAINER_MODEL_H
-#define SNORT_DNS_FIREWALL_TRAINER_MODEL_H
+#ifndef SNORT_DNS_FIREWALL_TRAINER_CONFIG_H
+#define SNORT_DNS_FIREWALL_TRAINER_CONFIG_H
+
+#include <string>
+#include <vector>
 
 namespace snort
 {
@@ -22,8 +25,36 @@ namespace dns_firewall
 namespace trainer
 {
 
-}
+class Config
+{
+ public:
+    class HmmConfig
+    {
+     public:
+        unsigned hidden_states;
+        bool operator==( const HmmConfig& ) const;
+    };
+    class EntropyConfig
+    {
+     public:
+        unsigned bins;
+        bool log_scale;
+        std::vector<unsigned> window_widths;
+        bool operator==( const EntropyConfig& ) const;
+    };
+
+    std::string dataset;
+    std::string model_file;
+    int max_lines;
+    HmmConfig hmm;
+    EntropyConfig entropy;
+
+    explicit Config( const std::string& );
+    bool operator==( const Config& ) const;
+};
+
+} // namespace trainer
 } // namespace dns_firewall
 } // namespace snort
 
-#endif // SNORT_DNS_FIREWALL_TRAINER_MODEL_H
+#endif // SNORT_DNS_FIREWALL_TRAINER_CONFIG_H

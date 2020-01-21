@@ -42,13 +42,10 @@ bool Module::set( const char*, Value& v, SnortConfig* )
     if( v.is( "enabled" ) ) {
         if( v.get_bool() ) {
             std::cout << "dns_firewall: enabled = true" << std::endl;
-            config_.enabled_ = true;
         } else {
             std::cout << "dns_firewall: enabled = false" << std::endl;
-            config_.enabled_ = false;
         }
     } else if( v.is( "message" ) ) {
-        config_.message_ = v.get_string();
         std::cout << "dns_firewall: message = " << v.get_string() << std::endl;
     } else {
         return false;
