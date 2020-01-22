@@ -33,6 +33,8 @@
 #include <vector>
 #include <yaml-cpp/yaml.h>
 
+extern char* optarg;
+
 using namespace snort::dns_firewall::trainer;
 
 // Get x-level suffix of DNS domain from string
@@ -52,15 +54,83 @@ static std::string get_dns_xld( const std::string& domain, unsigned level )
     return std::string( domain );
 }
 
+void save_graph( const entropy::LineProcessor& lp, const std::string& filename_suffix,
+                 bool log )
+{
+    std::vector<double> dist = lp.get_distribution( log );
+    std::string filename     = std::to_string( lp.get_window_width() ) + filename_suffix;
+    std::ofstream fs( filename );
+    for( unsigned i = 0; i < dist.size(); ++i ) {
+        fs << dist[i] << std::endl;
+    }
+    fs.close();
+}
+
 // ----------------
 // ENTRYPOINT
 // ----------------
 int main( int argc, char* const argv[] )
 {
-    // Load and print program options
     std::cout << "snort3trainer 0.1.1 by Artur M. Brodzki" << std::endl;
-    Config options = Config( "etc/snort/dns-firewall/config.yaml" );
+    std::string help =
+      "\n"
+      "Usage:\n"
+      "   -c: YAML config file name (mandatory)\n"
+      "       If -f, -n, -o option is specified, configuration\n"
+      "       from YAML file is overwritten.\n\n"
+      "   -f: File name of the dataset to process\n"
+      "   -n: max number of lines to process\n"
+      "   -o: Model file name\n"
+      "   -h: Print this help\n";
 
+    // Load config.yaml file
+    int opt;
+    bool save_graphs = false;
+    std::string yaml_filename_getopt;
+    std::string dataset_filename_getopt;
+    std::string model_filename_getopt;
+    int max_lines_getopt = -1;
+
+    while( ( opt = getopt( argc, argv, "gc:f:n:o:h" ) ) != -1 ) {
+        switch( opt ) {
+        case 'g':
+            save_graphs = true;
+            break;
+        case 'c':
+            yaml_filename_getopt = std::string( optarg );
+            break;
+        case 'f':
+            dataset_filename_getopt = std::string( optarg );
+            break;
+        case 'n':
+            max_lines_getopt = std::stoi( optarg );
+            break;
+        case 'o':
+            model_filename_getopt = std::string( optarg );
+            break;
+        case 'h':
+            std::cout << help << std::endl;
+            exit( 0 );
+            break;
+        }
+    }
+    if( yaml_filename_getopt == "" ) {
+        std::cout << help << std::endl;
+        exit( 1 );
+    }
+    std::cout << "Config file: " << yaml_filename_getopt << std::endl;
+    Config options = Config( yaml_filename_getopt );
+    if( dataset_filename_getopt != "" ) {
+        options.dataset = dataset_filename_getopt;
+    }
+    if( model_filename_getopt != "" ) {
+        options.model_file = model_filename_getopt;
+    }
+    if( max_lines_getopt != -1 ) {
+        options.max_lines = max_lines_getopt;
+    }
+
+    // Load and print trainer options
     std::cout << std::endl << "Dataset file name = " << options.dataset << std::endl;
     std::cout << "Window sizes = ";
     for( unsigned i = 0; i < options.entropy.window_widths.size(); ++i ) {
@@ -69,8 +139,9 @@ int main( int argc, char* const argv[] )
     std::cout << std::endl;
     std::cout << "Distribution Bins = " << options.entropy.bins << std::endl;
     std::cout << "Output file name = " << options.model_file << std::endl;
-    if( options.entropy.log_scale )
+    if( options.entropy.log_scale ) {
         std::cout << std::endl << "Generating log-scale distribution..." << std::endl;
+    }
 
     // Create line_processor objects
     std::vector<entropy::LineProcessor> fifos;
@@ -96,7 +167,7 @@ int main( int argc, char* const argv[] )
         }
         ++processed_lines;
         if( processed_lines % 1024 == 0 ) {
-            std::cout << "Processed lines: " << processed_lines << '\r' << std::flush;
+            std::cout << "\rProcessed lines: " << processed_lines << "    " << std::flush;
         }
     }
 
@@ -111,8 +182,15 @@ int main( int argc, char* const argv[] )
 
     // Save result distribution to file
     model.save( options.model_file );
-    std::cout << "Distribution saved to " << options.model_file << "!" << std::endl;
+    std::cout << "\rDistribution saved to " << options.model_file << "!" << std::endl;
     std::cout << "Processed lines: " << processed_lines << std::endl;
+
+    if( save_graphs ) {
+        // Save graph distributions for Excel
+        for( unsigned i = 0; i < fifos.size(); ++i ) {
+            save_graph( fifos[i], "-rb.csv", false );
+        }
+    }
 
     return 0;
 }

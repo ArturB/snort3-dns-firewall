@@ -4,7 +4,9 @@ bin/*
 build/*
 !build/.gitkeep
 
-data
+data/*
+
+graphs/*
 
 script/*
 

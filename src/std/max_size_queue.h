@@ -12,12 +12,24 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
-#include "dns_classifier.h"
+#ifndef STD_MAX_SIZE_QUEUE_H
+#define STD_MAX_SIZE_QUEUE_H
 
-// DnsClassifier::DnsClassifier( const snort::dns_firewall::Config& config_,
-//                               const snort::dns_firewall::Model& model_ )
-//     : config( config_ )
-//     , model( model_ )
+#include <queue>
+
+namespace std
+{
+
+// template<class T>
+// class MaxSizeQueue : public std::queue<T>
 // {
 
-// }
+//  public:
+//     unsigned max_size;
+//     MaxSizeQueue( unsigned );
+//     void insert( const T& ) override;
+// };
+
+// } // namespace std
+
+#endif // STD_MAX_SIZE_QUEUE_H

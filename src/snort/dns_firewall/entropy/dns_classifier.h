@@ -24,6 +24,21 @@ namespace entropy
 
 class DnsClassifier
 {
+//  private:
+//     class FifoWithMaxSize
+//     {
+//      public:
+//         unsigned max_size;
+//         std::queue<std::string> fifo;
+//     }
+
+//     snort::dns_classifier::Config config;
+//     snort::dns_classifier::Model model;
+//     std::vector<DnsClassifier::FifoWithMaxSize> fifos;
+
+//  public:
+//     DnsClassifier( const snort::dns_firewall::Config&, const snort::dns_firewall::Model& );
+//     double dns_metric( const std::string& );
 };
 
 } // namespace entropy

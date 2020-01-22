@@ -15,6 +15,10 @@
 #ifndef SNORT_DNS_FIREWALL_HMM_DNS_CLASSIFIER_H
 #define SNORT_DNS_FIREWALL_HMM_DNS_CLASSIFIER_H
 
+#include "config.h"
+#include "model.h"
+#include <queue>
+
 namespace snort
 {
 namespace dns_classifier
