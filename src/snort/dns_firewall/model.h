@@ -31,6 +31,7 @@ class Model
 
     void save( std::string filename );
     void load( std::string filename );
+    void save_graphs( const std::string&, const std::string& = ".csv" );
 };
 
 } // namespace dns_firewall

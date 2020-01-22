@@ -54,18 +54,6 @@ static std::string get_dns_xld( const std::string& domain, unsigned level )
     return std::string( domain );
 }
 
-void save_graph( const entropy::LineProcessor& lp, const std::string& filename_suffix,
-                 bool log )
-{
-    std::vector<double> dist = lp.get_distribution( log );
-    std::string filename     = std::to_string( lp.get_window_width() ) + filename_suffix;
-    std::ofstream fs( filename );
-    for( unsigned i = 0; i < dist.size(); ++i ) {
-        fs << dist[i] << std::endl;
-    }
-    fs.close();
-}
-
 // ----------------
 // ENTRYPOINT
 // ----------------
@@ -177,7 +165,6 @@ int main( int argc, char* const argv[] )
         unsigned win_width = fifos[i].get_window_width();
         model.entropy_distribution[win_width] =
           fifos[i].get_distribution( options.entropy.log_scale );
-        // std::ofstream graph()
     }
 
     // Save result distribution to file
@@ -186,10 +173,7 @@ int main( int argc, char* const argv[] )
     std::cout << "Processed lines: " << processed_lines << std::endl;
 
     if( save_graphs ) {
-        // Save graph distributions for Excel
-        for( unsigned i = 0; i < fifos.size(); ++i ) {
-            save_graph( fifos[i], "-rb.csv", false );
-        }
+        model.save_graphs("bin/rb-");
     }
 
     return 0;

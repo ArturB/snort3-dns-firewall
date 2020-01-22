@@ -41,5 +41,17 @@ void Model::load( std::string filename )
     fs.close();
 }
 
+void Model::save_graphs( const std::string& filename_prefix,
+                         const std::string& filename_suffix )
+{
+    for( auto it = entropy_distribution.begin(); it != entropy_distribution.end(); ++it ) {
+        std::ofstream fs( filename_prefix + std::to_string( it->first ) + filename_suffix );
+        for( unsigned i = 0; i < it->second.size(); ++i ) {
+            fs << it->second[i] << std::endl;
+        }
+        fs.close();
+    }
+}
+
 } // namespace dns_firewall
 } // namespace snort

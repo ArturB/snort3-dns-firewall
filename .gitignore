@@ -6,8 +6,6 @@ build/*
 
 data/*
 
-graphs/*
-
 script/*
 
 .vscode
