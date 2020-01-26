@@ -1,5 +1,5 @@
 #!/bin/bash
 
 cd build
-make -j $(nproc)
+make -j $(nproc) $@
 cd ..

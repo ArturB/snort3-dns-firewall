@@ -12,15 +12,24 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
-#ifndef SNORT_DNS_FIREWALL_DNS_CODEC_H
-#define SNORT_DNS_FIREWALL_DNS_CODEC_H
+#ifndef SNORT_DNS_FIREWALL_DISTRIBUTION_SCALE_H
+#define SNORT_DNS_FIREWALL_DISTRIBUTION_SCALE_H
+
+#include <string>
+#include <vector>
 
 namespace snort
 {
 namespace dns_firewall
 {
 
-}
+enum DistributionScale
+{
+    LINEAR,
+    LOG
+};
+
+} // namespace dns_firewall
 } // namespace snort
 
-#endif // SNORT_DNS_FIREWALL_DNS_CODEC_H
+#endif // SNORT_DNS_FIREWALL_DISTRIBUTION_SCALE_H

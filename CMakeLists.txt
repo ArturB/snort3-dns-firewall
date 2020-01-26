@@ -55,6 +55,8 @@ endif ( ENABLE_RELEASE )
 
 # Process src dir
 add_subdirectory ( src )
+# Process etc dir
+add_subdirectory( etc )
 
 # Output dirs
 set(CMAKE_INSTALL_PREFIX "/usr/local")

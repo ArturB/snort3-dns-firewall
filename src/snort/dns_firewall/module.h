@@ -15,10 +15,11 @@
 #ifndef SNORT_DNS_FIREWALL_MODULE_H
 #define SNORT_DNS_FIREWALL_MODULE_H
 
+#include "config.h"
 #include "ips_option.h"
-#include "profiler/profiler.h"
 #include <framework/module.h>
 #include <iostream>
+#include <profiler/profiler.h>
 
 namespace snort
 {
@@ -30,7 +31,7 @@ static THREAD_LOCAL ProfileStats dns_tunnel_perf_stats;
 class Module : public snort::Module
 {
   public:
-    //Config config_;
+    std::string config_filename;
 
   public:
     Module();

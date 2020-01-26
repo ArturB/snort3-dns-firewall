@@ -1,12 +1,12 @@
 plugin:
     mode: simple
-    model-file: bin/model.snort3model
+    model-file: /etc/snort/dns-firewall/basic.snort3model
     whitelist: ""
     blacklist: ""
     length:
-        min-length: 3
-        max-length: 25
-        max-length-penalty: 1
+        min-length: 8
+        max-length: 40
+        max-length-penalty: 1.5
     hmm:
         weight: 10
     entropy:
@@ -31,7 +31,7 @@ trainer:
         hidden-states: 10
     entropy:
         bins: 1000
-        log-scale: true
+        scale: log
         window-widths: [
             30,100,300,1000
         ]

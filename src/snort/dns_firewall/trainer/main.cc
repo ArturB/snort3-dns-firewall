@@ -12,10 +12,10 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
+#include "entropy/dns_classifier.h"
+#include "hmm/dns_classifier.h"
 #include "model.h"
 #include "trainer/config.h"
-#include "trainer/entropy/line_processor.h"
-#include "trainer/hmm/line_processor.h"
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
@@ -35,24 +35,7 @@
 
 extern char* optarg;
 
-using namespace snort::dns_firewall::trainer;
-
-// Get x-level suffix of DNS domain from string
-// e.g. for GetDnsFld(s2.smtp.google.com, 2) function returns google.com
-// dont work for empty string
-static std::string get_dns_xld( const std::string& domain, unsigned level )
-{
-    char delimiter             = '.';
-    unsigned delimiters_passed = 0;
-    for( unsigned long i = domain.length() - 1; i > 0; --i ) {
-        if( domain[i] == delimiter ) {
-            ++delimiters_passed;
-            if( delimiters_passed == level )
-                return domain.substr( i + 1, domain.size() );
-        }
-    }
-    return std::string( domain );
-}
+using namespace snort::dns_firewall;
 
 // ----------------
 // ENTRYPOINT
@@ -107,7 +90,7 @@ int main( int argc, char* const argv[] )
         exit( 1 );
     }
     std::cout << "Config file: " << yaml_filename_getopt << std::endl;
-    Config options = Config( yaml_filename_getopt );
+    trainer::Config options = trainer::Config( yaml_filename_getopt );
     if( dataset_filename_getopt != "" ) {
         options.dataset = dataset_filename_getopt;
     }
@@ -127,15 +110,15 @@ int main( int argc, char* const argv[] )
     std::cout << std::endl;
     std::cout << "Distribution Bins = " << options.entropy.bins << std::endl;
     std::cout << "Output file name = " << options.model_file << std::endl;
-    if( options.entropy.log_scale ) {
+    if( options.entropy.scale == snort::dns_firewall::DistributionScale::LOG ) {
         std::cout << std::endl << "Generating log-scale distribution..." << std::endl;
     }
 
     // Create line_processor objects
-    std::vector<entropy::LineProcessor> fifos;
+    std::vector<entropy::DnsClassifier> fifos;
     for( unsigned i = 0; i < options.entropy.window_widths.size(); ++i ) {
         fifos.push_back(
-          entropy::LineProcessor( options.entropy.window_widths[i], options.entropy.bins ) );
+          entropy::DnsClassifier( options.entropy.window_widths[i], options.entropy.bins ) );
     }
 
     // Process data line by line
@@ -148,9 +131,8 @@ int main( int argc, char* const argv[] )
         if( line.empty() ) {
             continue;
         } else {
-            std::string xld = get_dns_xld( line, 2 );
             for( unsigned i = 0; i < fifos.size(); ++i ) {
-                fifos[i].process_line( xld );
+                fifos[i].learn( line );
             }
         }
         ++processed_lines;
@@ -164,7 +146,7 @@ int main( int argc, char* const argv[] )
     for( unsigned i = 0; i < fifos.size(); ++i ) {
         unsigned win_width = fifos[i].get_window_width();
         model.entropy_distribution[win_width] =
-          fifos[i].get_distribution( options.entropy.log_scale );
+          fifos[i].get_entropy_distribution( options.entropy.scale );
     }
 
     // Save result distribution to file
@@ -173,7 +155,7 @@ int main( int argc, char* const argv[] )
     std::cout << "Processed lines: " << processed_lines << std::endl;
 
     if( save_graphs ) {
-        model.save_graphs("bin/rb-");
+        model.save_graphs( "bin/rb-" );
     }
 
     return 0;

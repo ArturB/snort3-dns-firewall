@@ -33,7 +33,5 @@ echo "Source Directory: $sourcedir"
 cd $builddir
 
 cmake \
-    -DCMAKE_CXX_FLAGS:STRING="$CXXFLAGS $CPPFLAGS" \
-    -DCMAKE_C_FLAGS:STRING="$CFLAGS $CPPFLAGS" \
     -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
     $sourcedir

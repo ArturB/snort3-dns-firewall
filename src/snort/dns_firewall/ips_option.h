@@ -16,8 +16,12 @@
 #define SNORT_DNS_FIREWALL_OPTION_H
 
 #include "config.h"
+#include "dns_packet.h"
+#include "entropy/dns_classifier.h"
+#include "model.h"
 #include <framework/ips_option.h>
 #include <iostream>
+#include <vector>
 
 namespace snort
 {
@@ -30,10 +34,13 @@ static const char* module_help = "alert on suspicious DNS queries activity";
 class IpsOption : public snort::IpsOption
 {
   private:
-    //Config config_;
+    Config options;
+    Model model;
+    std::vector<entropy::DnsClassifier> dns_classifiers;
+    double calculate_score( const DnsPacket& );
 
   public:
-    IpsOption( );
+    explicit IpsOption( const std::string& );
     bool operator==( const IpsOption& ) const;
 
     uint32_t hash() const override;

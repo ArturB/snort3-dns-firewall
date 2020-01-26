@@ -23,7 +23,7 @@ include_directories(
 add_library (
     dnsfirewall MODULE
         snort/dns_firewall/config.cc
-        snort/dns_firewall/dns_codec.cc
+        snort/dns_firewall/dns_packet.cc
         snort/dns_firewall/ips_option.cc
         snort/dns_firewall/model.cc
         snort/dns_firewall/module.cc
@@ -44,10 +44,10 @@ install (
 add_executable(
     snort3trainer
         snort/dns_firewall/model.cc
+        snort/dns_firewall/entropy/dns_classifier.cc
+        snort/dns_firewall/hmm/dns_classifier.cc
         snort/dns_firewall/trainer/config.cc
         snort/dns_firewall/trainer/main.cc
-        snort/dns_firewall/trainer/entropy/line_processor.cc
-        snort/dns_firewall/trainer/hmm/line_processor.cc
 )
 target_link_libraries(
     snort3trainer
@@ -58,7 +58,4 @@ install (
     TARGETS snort3trainer
     RUNTIME DESTINATION "lib64/snort/${CMAKE_PROJECT_NAME}"
 )
-install (
-    FILES config.yaml
-    DESTINATION "/etc/snort/dns-firewall"
-)
+

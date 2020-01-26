@@ -12,12 +12,48 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
-#include "dns_codec.h"
+#ifndef SNORT_DNS_FIREWALL_DNS_CODEC_H
+#define SNORT_DNS_FIREWALL_DNS_CODEC_H
+
+#include "protocols/packet.h"
+#include "protocols/udp.h"
 
 namespace snort
 {
 namespace dns_firewall
 {
 
-}
+class DnsPacket
+{
+  public:
+    class Question
+    {
+      public:
+        unsigned qlen;
+        std::string qname;
+        unsigned qtype;
+        unsigned qclass;
+        Question()
+            : qlen( 0 )
+            , qtype( 0 )
+            , qclass( 0 )
+        {
+        }
+    };
+
+    explicit DnsPacket( snort::Packet* p );
+
+    u_int16_t id;
+    u_int16_t flags;
+    u_int16_t question_num;
+    u_int16_t answer_num;
+    u_int16_t authority_num;
+    u_int16_t additional_num;
+    std::vector<DnsPacket::Question> questions;
+    bool malformed;
+};
+
+} // namespace dns_firewall
 } // namespace snort
+
+#endif // SNORT_DNS_FIREWALL_DNS_CODEC_H

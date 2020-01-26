@@ -25,7 +25,7 @@ namespace dns_firewall
 
 class Config
 {
- public:
+  public:
     enum Mode
     {
         SIMPLE,
@@ -33,29 +33,29 @@ class Config
     };
     class HmmConfig
     {
-     public:
+      public:
         unsigned weight;
         bool operator==( const HmmConfig& ) const;
     };
     class EntropyConfig
     {
-     public:
+      public:
         unsigned weight;
         bool operator==( const EntropyConfig& ) const;
     };
     class LengthConfig
     {
-     public:
+      public:
         unsigned min_length;
         unsigned max_length;
-        unsigned max_length_penalty;
+        double max_length_penalty;
         bool operator==( const LengthConfig& ) const;
     };
     class RejectConfig
     {
-     public:
+      public:
         unsigned block_period;
-        unsigned threshold;
+        int threshold;
         unsigned repetitions;
         bool operator==( const RejectConfig& ) const;
     };

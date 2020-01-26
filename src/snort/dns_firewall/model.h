@@ -25,7 +25,7 @@ namespace dns_firewall
 
 class Model
 {
- public:
+  public:
     unsigned bins;
     std::unordered_map<unsigned, std::vector<double>> entropy_distribution;
 

@@ -13,8 +13,11 @@
 // **********************************************************************
 
 #include "module.h"
+#include "config.h"
 #include "ips_option.h"
+#include <fstream>
 #include <profiler/profiler.h>
+#include <unistd.h>
 
 namespace snort
 {
@@ -22,8 +25,7 @@ namespace dns_firewall
 {
 
 static const Parameter module_params[] = {
-    { "enabled", Parameter::PT_BOOL, nullptr, nullptr, "DNS firewall enabled" },
-    { "message", Parameter::PT_STRING, nullptr, nullptr, "DNS message" },
+    { "config_filename", Parameter::PT_STRING, nullptr, nullptr, "DNS firewall configuration file path" },
     { nullptr, Parameter::PT_MAX, nullptr, nullptr, nullptr }
 };
 
@@ -39,19 +41,20 @@ bool Module::begin( const char*, int, SnortConfig* )
 
 bool Module::set( const char*, Value& v, SnortConfig* )
 {
-    if( v.is( "enabled" ) ) {
-        if( v.get_bool() ) {
-            std::cout << "dns_firewall: enabled = true" << std::endl;
+    if( v.is( "config_filename" ) ) {
+        config_filename = v.get_string();
+        std::cout << "[DNS Firewall] Config file path: " << config_filename << std::endl;
+        if( FILE* file = fopen( config_filename.c_str(), "r" ) ) {
+            fclose( file );
+            return true;
         } else {
-            std::cout << "dns_firewall: enabled = false" << std::endl;
+            std::cout << "[DNS Firewall] Could not open config file!" << std::endl;
+            return false;
         }
-    } else if( v.is( "message" ) ) {
-        std::cout << "dns_firewall: message = " << v.get_string() << std::endl;
     } else {
+        std::cout << "[DNS Firewall] Config file not specified!" << std::endl;
         return false;
     }
-
-    return true;
 }
 
 bool Module::end( const char*, int, SnortConfig* )

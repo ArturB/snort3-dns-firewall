@@ -25,8 +25,7 @@ bool Config::HmmConfig::operator==( const Config::HmmConfig& operand2 ) const
     return weight == operand2.weight;
 }
 
-bool Config::EntropyConfig::operator==(
-  const Config::EntropyConfig& operand2 ) const
+bool Config::EntropyConfig::operator==( const Config::EntropyConfig& operand2 ) const
 {
     return weight == operand2.weight;
 }
@@ -64,28 +63,26 @@ Config::Config( const std::string& config_filename )
     }
 
     model_file = node["plugin"]["model-file"].as<std::string>();
-    whitelist = node["plugin"]["whitelist"].as<std::string>();
-    blacklist = node["plugin"]["blacklist"].as<std::string>();
+    whitelist  = node["plugin"]["whitelist"].as<std::string>();
+    blacklist  = node["plugin"]["blacklist"].as<std::string>();
 
-    length.min_length = node["plugin"]["length"]["min-length"].as<int>();
-    length.max_length = node["plugin"]["length"]["max-length"].as<int>();
-    length.max_length_penalty = node["plugin"]["length"]["max-length-penalty"].as<int>();
+    length.min_length         = node["plugin"]["length"]["min-length"].as<int>();
+    length.max_length         = node["plugin"]["length"]["max-length"].as<int>();
+    length.max_length_penalty = node["plugin"]["length"]["max-length-penalty"].as<double>();
 
     hmm.weight     = node["plugin"]["hmm"]["weight"].as<int>();
     entropy.weight = node["plugin"]["entropy"]["weight"].as<int>();
 
     short_reject.block_period = node["plugin"]["short-reject"]["block-period"].as<int>();
-    short_reject.threshold = node["plugin"]["short-reject"]["threshold"].as<int>();
+    short_reject.threshold    = node["plugin"]["short-reject"]["threshold"].as<int>();
     short_reject.repetitions  = node["plugin"]["short-reject"]["repetitions"].as<int>();
 
     long_reject.block_period = node["plugin"]["long-reject"]["block-period"].as<int>();
     long_reject.threshold    = node["plugin"]["long-reject"]["threshold"].as<int>();
     long_reject.repetitions  = node["plugin"]["long-reject"]["repetitions"].as<int>();
 
-    permanent_reject.threshold =
-      node["plugin"]["permanent-reject"]["threshold"].as<int>();
-    permanent_reject.repetitions =
-      node["plugin"]["permanent-reject"]["repetitions"].as<int>();
+    permanent_reject.threshold   = node["plugin"]["permanent-reject"]["threshold"].as<int>();
+    permanent_reject.repetitions = node["plugin"]["permanent-reject"]["repetitions"].as<int>();
 }
 
 } // namespace dns_firewall

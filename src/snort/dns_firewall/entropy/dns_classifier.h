@@ -12,8 +12,24 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
-#ifndef SNORT_DNS_FIREWALL_ENTROPY_DNS_CLASSIFIER_H
-#define SNORT_DNS_FIREWALL_ENTROPY_DNS_CLASSIFIER_H
+#ifndef SNORT_DNS_FIREWALL_TRAINER_ENTROPY_LINE_PROCESSOR_H
+#define SNORT_DNS_FIREWALL_TRAINER_ENTROPY_LINE_PROCESSOR_H
+
+#include "distribution_scale.h"
+#include <algorithm>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
+#include <getopt.h>
+#include <iostream>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <string>
+#include <unistd.h>
+#include <unordered_map>
+#include <vector>
 
 namespace snort
 {
@@ -24,25 +40,72 @@ namespace entropy
 
 class DnsClassifier
 {
-//  private:
-//     class FifoWithMaxSize
-//     {
-//      public:
-//         unsigned max_size;
-//         std::queue<std::string> fifo;
-//     }
+  private:
+    // FIFO DNS queries buffer
+    std::queue<std::string> dns_fifo_; // FIFO queue of processed domains
+    unsigned dns_fifo_size_;           // Memoized size of above FIFO queue
+    double current_metric_;            // Memoized concentration metric of current FIFO
+    unsigned window_width_;            // Target window width
+    std::unordered_map<std::string, unsigned> freq_; // Mapping from FLDs to its frequencies
 
-//     snort::dns_classifier::Config config;
-//     snort::dns_classifier::Model model;
-//     std::vector<DnsClassifier::FifoWithMaxSize> fifos;
+    // Entropy probability distribution
+    std::vector<unsigned>
+      entropy_distribution_; // Probability distribution of entropy,
+                             // stored as number of observations for distribution bins
+    unsigned dist_bins_;     // Number of bins in entropy distribution
 
-//  public:
-//     DnsClassifier( const snort::dns_firewall::Config&, const snort::dns_firewall::Model& );
-//     double dns_metric( const std::string& );
+    // Statistics
+    bool state_shift_; // If true, domain are shifted with pop
+
+  private:
+    // Get x-level suffix of DNS domain from string
+    // e.g. for GetDnsFld(s2.smtp.google.com, 2) function returns google.com
+    // dont work for empty string
+    std::string get_dns_xld( const std::string&, unsigned );
+
+    // Calculates given metric for one FLD
+    double domain_metric( unsigned ) const;
+
+    // Calculate given metric for dns_fifo
+    double fifo_metric() const;
+
+    // Insert new domain to window
+    // Updates current_metric value
+    void insert( const std::string& );
+
+    // Pop domain from window
+    // Updates current_metric value
+    void pop();
+
+    // Shift window to new domain
+    void forward_shift( const std::string& );
+
+    // Get estimated probability of domain/fifo
+    // double log_probability( const std::string& );
+
+  public:
+    // Default constructor
+    explicit DnsClassifier( unsigned window_width, unsigned dist_bins );
+
+    // Get entropy distribution
+    std::vector<double>
+      get_entropy_distribution( snort::dns_firewall::DistributionScale ) const;
+    // Set entropy distribution
+    void set_entropy_distribution( const std::vector<double>&, unsigned,
+                                   snort::dns_firewall::DistributionScale );
+    // Get number of distribution bins
+    unsigned get_distribution_bins() const;
+    // Get current window width
+    unsigned get_window_width() const;
+
+    // Learn classifier with one DNS domain
+    void learn( const std::string& );
+    // Classify DNS domain
+    double classify( const std::string&, snort::dns_firewall::DistributionScale );
 };
 
 } // namespace entropy
 } // namespace dns_firewall
 } // namespace snort
 
-#endif // SNORT_DNS_FIREWALL_ENTROPY_DNS_CLASSIFIER_H
+#endif // SNORT_DNS_FIREWALL_TRAINER_ENTROPY_LINE_PROCESSOR_H

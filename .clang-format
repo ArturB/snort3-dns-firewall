@@ -6,7 +6,7 @@ Language: Cpp
 Standard: Cpp11
 
 # Indentation
-AccessModifierOffset: -3
+AccessModifierOffset: -2
 ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth: 2
 IndentCaseLabels: false

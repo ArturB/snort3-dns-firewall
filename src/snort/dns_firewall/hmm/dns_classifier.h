@@ -1,4 +1,4 @@
-/// **********************************************************************
+// **********************************************************************
 // Copyright (c) Artur M. Brodzki 2019-2020. All rights reserved.
 //
 // This program is free software: you can redistribute it and/or modify
@@ -12,26 +12,29 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
-#ifndef SNORT_DNS_FIREWALL_HMM_DNS_CLASSIFIER_H
-#define SNORT_DNS_FIREWALL_HMM_DNS_CLASSIFIER_H
-
-#include "config.h"
-#include "model.h"
+#include <algorithm>
+#include <armadillo>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
+#include <getopt.h>
+#include <iostream>
 #include <queue>
+#include <set>
+#include <sstream>
+#include <string>
+#include <unistd.h>
+#include <unordered_map>
+#include <vector>
 
 namespace snort
 {
-namespace dns_classifier
+namespace dns_firewall
 {
 namespace hmm
 {
 
-class DnsClassifier
-{
-};
-
-} // namespace hmm
-} // namespace dns_classifier
+}
+} // namespace dns_firewall
 } // namespace snort
-
-#endif // SNORT_DNS_FIREWALL_HMM_DNS_CLASSIFIER_H

@@ -24,7 +24,7 @@ namespace trainer
 
 bool Config::EntropyConfig::operator==( const Config::EntropyConfig& operand2 ) const
 {
-    return bins == operand2.bins && log_scale == operand2.log_scale &&
+    return bins == operand2.bins && scale == operand2.scale &&
            window_widths == operand2.window_widths;
 }
 
@@ -50,8 +50,14 @@ Config::Config( const std::string& config_filename )
 
     hmm.hidden_states = node["trainer"]["hmm"]["hidden-states"].as<int>();
 
-    entropy.bins      = node["trainer"]["entropy"]["bins"].as<int>();
-    entropy.log_scale = node["trainer"]["entropy"]["log-scale"].as<bool>();
+    entropy.bins = node["trainer"]["entropy"]["bins"].as<int>();
+
+    std::string log_scale = node["trainer"]["entropy"]["scale"].as<std::string>();
+    if( log_scale == "log" ) {
+        entropy.scale = snort::dns_firewall::DistributionScale::LOG;
+    } else {
+        entropy.scale = snort::dns_firewall::DistributionScale::LINEAR;
+    }
 
     YAML::Node win_widths = node["trainer"]["entropy"]["window-widths"];
     for( auto it = win_widths.begin(); it != win_widths.end(); ++it ) {

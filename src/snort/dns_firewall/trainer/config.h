@@ -17,6 +17,7 @@
 
 #include <string>
 #include <vector>
+#include "distribution_scale.h"
 
 namespace snort
 {
@@ -27,18 +28,18 @@ namespace trainer
 
 class Config
 {
- public:
+  public:
     class HmmConfig
     {
-     public:
+      public:
         unsigned hidden_states;
         bool operator==( const HmmConfig& ) const;
     };
     class EntropyConfig
     {
-     public:
+      public:
         unsigned bins;
-        bool log_scale;
+        snort::dns_firewall::DistributionScale scale;
         std::vector<unsigned> window_widths;
         bool operator==( const EntropyConfig& ) const;
     };

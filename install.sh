@@ -1,5 +1,5 @@
 #!/bin/bash
 
 cd build
-sudo make install -j $(nproc)
+sudo make install -j $(nproc) $@
 cd ..
