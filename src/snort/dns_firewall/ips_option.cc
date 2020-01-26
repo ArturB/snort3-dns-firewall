@@ -15,15 +15,11 @@
 #include "ips_option.h"
 #include "dns_packet.h"
 
-namespace snort
-{
-namespace dns_firewall
-{
+namespace snort { namespace dns_firewall {
 
 dns_firewall::IpsOption::IpsOption( const std::string& config_filename )
     : options( config_filename )
-    , snort::IpsOption( module_name )
-{
+    , snort::IpsOption( module_name ) {
     model.load( options.model_file );
 
     std::cout << "[DNS Firewall] Current configuration:" << std::endl;
@@ -35,12 +31,13 @@ dns_firewall::IpsOption::IpsOption( const std::string& config_filename )
     }
     std::cout << "[DNS Firewall]    - model-file: " << options.model_file << std::endl;
     std::cout << "[DNS Firewall]    - window widths: ";
-    for( auto it = model.get_entropy_distribution().begin(); it != model.get_entropy_distribution().end();
+    for( auto it = model.get_entropy_distribution().begin();
+         it != model.get_entropy_distribution().end();
          ++it ) {
         std::cout << it->first << " ";
         dns_classifiers.push_back( entropy::DnsClassifier( it->first, it->second.size() ) );
-        dns_classifiers.back().set_entropy_distribution( it->second, 1000000,
-                                                         DistributionScale::LOG );
+        dns_classifiers.back().set_entropy_distribution(
+          it->second, 1000000, DistributionScale::LOG );
     }
     std::cout << std::endl;
     std::cout << "[DNS Firewall]    - min-length: " << options.length.min_length << std::endl;
@@ -61,18 +58,15 @@ dns_firewall::IpsOption::IpsOption( const std::string& config_filename )
               << options.permanent_reject.threshold << std::endl;
 }
 
-uint32_t dns_firewall::IpsOption::hash() const
-{
+uint32_t dns_firewall::IpsOption::hash() const {
     return 3984583;
 }
 
-bool dns_firewall::IpsOption::operator==( const dns_firewall::IpsOption& operand2 ) const
-{
+bool dns_firewall::IpsOption::operator==( const dns_firewall::IpsOption& operand2 ) const {
     return true;
 }
 
-double dns_firewall::IpsOption::calculate_score( const DnsPacket& dns )
-{
+double dns_firewall::IpsOption::calculate_score( const DnsPacket& dns ) {
     double min_score = 0;
     for( unsigned q = 0; q < dns.question_num; ++q ) {
         double score = 0;
@@ -99,8 +93,7 @@ double dns_firewall::IpsOption::calculate_score( const DnsPacket& dns )
     return min_score;
 }
 
-snort::IpsOption::EvalStatus dns_firewall::IpsOption::eval( Cursor&, Packet* p )
-{
+snort::IpsOption::EvalStatus dns_firewall::IpsOption::eval( Cursor&, Packet* p ) {
     DnsPacket dns = DnsPacket( p );
     if( dns.malformed ) {
         std::cout << "[DNS Firewall] Not a DNS query!" << std::endl;
@@ -118,5 +111,4 @@ snort::IpsOption::EvalStatus dns_firewall::IpsOption::eval( Cursor&, Packet* p )
     return NO_MATCH;
 }
 
-} // namespace dns_firewall
-} // namespace snort
+}} // namespace snort::dns_firewall

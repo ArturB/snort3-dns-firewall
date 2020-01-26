@@ -15,35 +15,27 @@
 #include "config.h"
 #include <yaml-cpp/yaml.h>
 
-namespace snort
-{
-namespace dns_firewall
-{
+namespace snort { namespace dns_firewall {
 
-bool Config::HmmConfig::operator==( const Config::HmmConfig& operand2 ) const
-{
+bool Config::HmmConfig::operator==( const Config::HmmConfig& operand2 ) const {
     return weight == operand2.weight;
 }
 
-bool Config::EntropyConfig::operator==( const Config::EntropyConfig& operand2 ) const
-{
+bool Config::EntropyConfig::operator==( const Config::EntropyConfig& operand2 ) const {
     return weight == operand2.weight;
 }
 
-bool Config::LengthConfig::operator==( const Config::LengthConfig& operand2 ) const
-{
+bool Config::LengthConfig::operator==( const Config::LengthConfig& operand2 ) const {
     return min_length == operand2.min_length && max_length == operand2.max_length &&
            max_length_penalty == operand2.max_length_penalty;
 }
 
-bool Config::RejectConfig::operator==( const Config::RejectConfig& operand2 ) const
-{
+bool Config::RejectConfig::operator==( const Config::RejectConfig& operand2 ) const {
     return block_period == operand2.block_period && threshold == operand2.threshold &&
            repetitions == operand2.repetitions;
 }
 
-bool Config::operator==( const Config& operand2 ) const
-{
+bool Config::operator==( const Config& operand2 ) const {
     return mode == operand2.mode && model_file == operand2.model_file &&
            blacklist == operand2.blacklist && whitelist == operand2.whitelist &&
            hmm == operand2.hmm && entropy == operand2.entropy && length == operand2.length &&
@@ -51,8 +43,7 @@ bool Config::operator==( const Config& operand2 ) const
            permanent_reject == operand2.permanent_reject;
 }
 
-Config::Config( const std::string& config_filename )
-{
+Config::Config( const std::string& config_filename ) {
     YAML::Node node = YAML::LoadFile( config_filename );
 
     if( node["plugin"]["mode"].as<std::string>() == "simple" ) {
@@ -85,5 +76,4 @@ Config::Config( const std::string& config_filename )
     permanent_reject.repetitions = node["plugin"]["permanent-reject"]["repetitions"].as<int>();
 }
 
-} // namespace dns_firewall
-} // namespace snort
+}} // namespace snort::dns_firewall

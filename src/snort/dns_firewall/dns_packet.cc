@@ -14,10 +14,7 @@
 
 #include "dns_packet.h"
 
-namespace snort
-{
-namespace dns_firewall
-{
+namespace snort { namespace dns_firewall {
 
 DnsPacket::DnsPacket( Packet* p )
     : id( ( p->data[0] << 8 ) + p->data[1] )
@@ -27,8 +24,7 @@ DnsPacket::DnsPacket( Packet* p )
     , authority_num( ( p->data[8] << 8 ) + p->data[9] )
     , additional_num( ( p->data[10] << 8 ) + p->data[11] )
     , malformed( false )
-    , questions()
-{
+    , questions() {
     int cursor_pos = 12;
     for( int i = 0; i < this->question_num; ++i ) {
         DnsPacket::Question q;
@@ -38,8 +34,8 @@ DnsPacket::DnsPacket( Packet* p )
         while( cursor_pos < p->dsize && p->data[cursor_pos] &&
                cursor_pos + p->data[cursor_pos] < p->dsize ) {
 
-            strncat( (char*) &buf[q.qlen], (char*) &( p->data[cursor_pos + 1] ),
-                     p->data[cursor_pos] );
+            strncat(
+              (char*) &buf[q.qlen], (char*) &( p->data[cursor_pos + 1] ), p->data[cursor_pos] );
             q.qlen += p->data[cursor_pos] + 1;
             strcat( (char*) &buf[q.qlen - 1], "." );
             cursor_pos += 1 + p->data[cursor_pos];
@@ -60,5 +56,4 @@ DnsPacket::DnsPacket( Packet* p )
     }
 }
 
-} // namespace dns_firewall
-} // namespace snort
+}} // namespace snort::dns_firewall

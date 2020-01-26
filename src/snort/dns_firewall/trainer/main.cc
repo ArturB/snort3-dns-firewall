@@ -40,8 +40,7 @@ using namespace snort::dns_firewall;
 // ----------------
 // ENTRYPOINT
 // ----------------
-int main( int argc, char* const argv[] )
-{
+int main( int argc, char* const argv[] ) {
     std::cout << "snort3trainer 0.1.1 by Artur M. Brodzki" << std::endl;
     std::string help =
       "\n"

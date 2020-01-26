@@ -23,10 +23,7 @@
 #include <iostream>
 #include <vector>
 
-namespace snort
-{
-namespace dns_firewall
-{
+namespace snort { namespace dns_firewall {
 
 static const char* module_name = "dns_firewall";
 static const char* module_help = "alert on suspicious DNS queries activity";
@@ -47,7 +44,6 @@ class IpsOption : public snort::IpsOption
     EvalStatus eval( Cursor&, Packet* ) override;
 };
 
-} // namespace dns_firewall
-} // namespace snort
+}} // namespace snort::dns_firewall
 
 #endif // SNORT_DNS_FIREWALL_IPS_OPTION_H

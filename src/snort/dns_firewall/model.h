@@ -18,10 +18,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace snort
-{
-namespace dns_firewall
-{
+namespace snort { namespace dns_firewall {
 
 class Model
 {
@@ -38,7 +35,6 @@ class Model
     std::unordered_map<unsigned, std::vector<double>> get_entropy_distribution() const noexcept;
 };
 
-} // namespace dns_firewall
-} // namespace snort
+}} // namespace snort::dns_firewall
 
 #endif // SNORT_DNS_FIREWALL_TRAINER_MODEL_H

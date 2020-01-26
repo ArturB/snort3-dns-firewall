@@ -21,10 +21,7 @@
 #include <iostream>
 #include <profiler/profiler.h>
 
-namespace snort
-{
-namespace dns_firewall
-{
+namespace snort { namespace dns_firewall {
 
 static THREAD_LOCAL ProfileStats dns_tunnel_perf_stats;
 
@@ -44,7 +41,6 @@ class Module : public snort::Module
     Usage get_usage() const override;
 };
 
-} // namespace dns_firewall
-} // namespace snort
+}} // namespace snort::dns_firewall
 
 #endif // SNORT_DNS_FIREWALL_MODULE_H

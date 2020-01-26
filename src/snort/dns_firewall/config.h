@@ -18,10 +18,7 @@
 #include <string>
 #include <vector>
 
-namespace snort
-{
-namespace dns_firewall
-{
+namespace snort { namespace dns_firewall {
 
 struct Config
 {
@@ -70,7 +67,6 @@ struct Config
     bool operator==( const Config& ) const;
 };
 
-} // namespace dns_firewall
-} // namespace snort
+}} // namespace snort::dns_firewall
 
 #endif // SNORT_DNS_FIREWALL_CONFIG_H

@@ -18,10 +18,7 @@
 #include "protocols/packet.h"
 #include "protocols/udp.h"
 
-namespace snort
-{
-namespace dns_firewall
-{
+namespace snort { namespace dns_firewall {
 
 struct DnsPacket
 {
@@ -34,8 +31,7 @@ struct DnsPacket
         Question()
             : qlen( 0 )
             , qtype( 0 )
-            , qclass( 0 )
-        {
+            , qclass( 0 ) {
         }
     };
 
@@ -51,7 +47,6 @@ struct DnsPacket
     bool malformed;
 };
 
-} // namespace dns_firewall
-} // namespace snort
+}} // namespace snort::dns_firewall
 
 #endif // SNORT_DNS_FIREWALL_DNS_CODEC_H

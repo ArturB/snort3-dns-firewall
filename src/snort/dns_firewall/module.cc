@@ -19,28 +19,26 @@
 #include <profiler/profiler.h>
 #include <unistd.h>
 
-namespace snort
-{
-namespace dns_firewall
-{
+namespace snort { namespace dns_firewall {
 
 static const Parameter module_params[] = {
-    { "config_filename", Parameter::PT_STRING, nullptr, nullptr, "DNS firewall configuration file path" },
+    { "config_filename",
+      Parameter::PT_STRING,
+      nullptr,
+      nullptr,
+      "DNS firewall configuration file path" },
     { nullptr, Parameter::PT_MAX, nullptr, nullptr, nullptr }
 };
 
 Module::Module()
-    : snort::Module( module_name, module_help, module_params )
-{
+    : snort::Module( module_name, module_help, module_params ) {
 }
 
-bool Module::begin( const char*, int, SnortConfig* )
-{
+bool Module::begin( const char*, int, SnortConfig* ) {
     return true;
 }
 
-bool Module::set( const char*, Value& v, SnortConfig* )
-{
+bool Module::set( const char*, Value& v, SnortConfig* ) {
     if( v.is( "config_filename" ) ) {
         config_filename = v.get_string();
         std::cout << "[DNS Firewall] Config file path: " << config_filename << std::endl;
@@ -57,20 +55,16 @@ bool Module::set( const char*, Value& v, SnortConfig* )
     }
 }
 
-bool Module::end( const char*, int, SnortConfig* )
-{
+bool Module::end( const char*, int, SnortConfig* ) {
     return true;
 }
 
-ProfileStats* Module::get_profile() const
-{
+ProfileStats* Module::get_profile() const {
     return &dns_tunnel_perf_stats;
 }
 
-Module::Usage Module::get_usage() const
-{
+Module::Usage Module::get_usage() const {
     return DETECT;
 }
 
-} // namespace dns_firewall
-} // namespace snort
+}} // namespace snort::dns_firewall

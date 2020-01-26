@@ -18,10 +18,7 @@
 #include <string>
 #include <vector>
 
-namespace snort
-{
-namespace dns_firewall
-{
+namespace snort { namespace dns_firewall {
 
 enum DistributionScale
 {
@@ -29,7 +26,6 @@ enum DistributionScale
     LOG
 };
 
-} // namespace dns_firewall
-} // namespace snort
+}} // namespace snort::dns_firewall
 
 #endif // SNORT_DNS_FIREWALL_DISTRIBUTION_SCALE_H

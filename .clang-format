@@ -22,8 +22,8 @@ BraceWrapping:
     AfterClass: true
     AfterControlStatement: false
     AfterEnum: true
-    AfterFunction: true
-    AfterNamespace: true
+    AfterFunction: false
+    AfterNamespace: false
     AfterStruct: true
     AfterUnion: true
     AfterExternBlock: true
@@ -49,8 +49,8 @@ AllowShortLoopsOnASingleLine: false
 AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: true
 AlwaysBreakTemplateDeclarations: Yes
-BinPackArguments: true
-BinPackParameters: true
+BinPackArguments: false
+BinPackParameters: false
 BreakBeforeBinaryOperators: None
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializers: BeforeComma

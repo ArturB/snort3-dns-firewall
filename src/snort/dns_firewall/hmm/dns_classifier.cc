@@ -14,13 +14,6 @@
 
 #include "dns_classifier.h"
 
-namespace snort
-{
-namespace dns_firewall
-{
-namespace hmm
-{
+namespace snort { namespace dns_firewall { namespace hmm {
 
-}
-} // namespace dns_firewall
-} // namespace snort
+}}} // namespace snort::dns_firewall::hmm

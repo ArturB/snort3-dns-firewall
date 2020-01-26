@@ -15,33 +15,24 @@
 #include "config.h"
 #include <yaml-cpp/yaml.h>
 
-namespace snort
-{
-namespace dns_firewall
-{
-namespace trainer
-{
+namespace snort { namespace dns_firewall { namespace trainer {
 
-bool Config::EntropyConfig::operator==( const Config::EntropyConfig& operand2 ) const
-{
+bool Config::EntropyConfig::operator==( const Config::EntropyConfig& operand2 ) const {
     return bins == operand2.bins && scale == operand2.scale &&
            window_widths == operand2.window_widths;
 }
 
-bool Config::HmmConfig::operator==( const Config::HmmConfig& operand2 ) const
-{
+bool Config::HmmConfig::operator==( const Config::HmmConfig& operand2 ) const {
     return hidden_states == operand2.hidden_states;
 }
 
-bool Config::operator==( const Config& operand2 ) const
-{
+bool Config::operator==( const Config& operand2 ) const {
     return dataset == operand2.dataset && model_file == operand2.model_file &&
            max_lines == operand2.max_lines && hmm == operand2.hmm &&
            entropy == operand2.entropy;
 }
 
-Config::Config( const std::string& config_filename )
-{
+Config::Config( const std::string& config_filename ) {
     YAML::Node node = YAML::LoadFile( config_filename );
 
     dataset    = node["trainer"]["dataset"].as<std::string>();
@@ -65,6 +56,4 @@ Config::Config( const std::string& config_filename )
     }
 }
 
-} // namespace trainer
-} // namespace dns_firewall
-} // namespace snort
+}}} // namespace snort::dns_firewall::trainer

@@ -15,16 +15,11 @@
 #ifndef SNORT_DNS_FIREWALL_TRAINER_CONFIG_H
 #define SNORT_DNS_FIREWALL_TRAINER_CONFIG_H
 
+#include "distribution_scale.h"
 #include <string>
 #include <vector>
-#include "distribution_scale.h"
 
-namespace snort
-{
-namespace dns_firewall
-{
-namespace trainer
-{
+namespace snort { namespace dns_firewall { namespace trainer {
 
 struct Config
 {
@@ -51,8 +46,6 @@ struct Config
     bool operator==( const Config& ) const;
 };
 
-} // namespace trainer
-} // namespace dns_firewall
-} // namespace snort
+}}} // namespace snort::dns_firewall::trainer
 
 #endif // SNORT_DNS_FIREWALL_TRAINER_CONFIG_H

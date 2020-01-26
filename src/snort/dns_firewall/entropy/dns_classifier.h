@@ -31,12 +31,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace snort
-{
-namespace dns_firewall
-{
-namespace entropy
-{
+namespace snort { namespace dns_firewall { namespace entropy {
 
 class DnsClassifier
 {
@@ -54,7 +49,7 @@ class DnsClassifier
                              // stored as number of observations for distribution bins
     unsigned dist_bins_;     // Number of bins in entropy distribution
 
-    // Statistics
+    // Internal state
     bool state_shift_; // If true, maximal size of FIFO queue is reached and domains are shifted
                        // using pop
 
@@ -89,7 +84,8 @@ class DnsClassifier
     std::vector<double> get_entropy_distribution( snort::dns_firewall::DistributionScale ) const
       noexcept;
     // Set entropy distribution
-    void set_entropy_distribution( const std::vector<double>&, unsigned,
+    void set_entropy_distribution( const std::vector<double>&,
+                                   unsigned,
                                    snort::dns_firewall::DistributionScale );
     // Get number of distribution bins
     unsigned get_distribution_bins() const noexcept;
@@ -102,8 +98,6 @@ class DnsClassifier
     double classify( const std::string&, snort::dns_firewall::DistributionScale ) noexcept;
 };
 
-} // namespace entropy
-} // namespace dns_firewall
-} // namespace snort
+}}} // namespace snort::dns_firewall::entropy
 
 #endif // SNORT_DNS_FIREWALL_TRAINER_ENTROPY_LINE_PROCESSOR_H

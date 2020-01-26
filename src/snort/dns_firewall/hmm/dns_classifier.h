@@ -28,13 +28,6 @@
 #include <unordered_map>
 #include <vector>
 
-namespace snort
-{
-namespace dns_firewall
-{
-namespace hmm
-{
+namespace snort { namespace dns_firewall { namespace hmm {
 
-}
-} // namespace dns_firewall
-} // namespace snort
+}}} // namespace snort::dns_firewall::hmm
