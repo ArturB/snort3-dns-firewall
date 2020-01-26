@@ -25,6 +25,11 @@ namespace snort
 namespace dns_firewall
 {
 
+Model::Model()
+    : bins( 0 )
+{
+}
+
 void Model::save( std::string filename )
 {
     std::ofstream fs( filename );
@@ -51,6 +56,17 @@ void Model::save_graphs( const std::string& filename_prefix,
         }
         fs.close();
     }
+}
+
+unsigned Model::get_bins() const noexcept
+{
+    return bins;
+}
+
+std::unordered_map<unsigned, std::vector<double>> Model::get_entropy_distribution() const
+  noexcept
+{
+    return entropy_distribution;
 }
 
 } // namespace dns_firewall

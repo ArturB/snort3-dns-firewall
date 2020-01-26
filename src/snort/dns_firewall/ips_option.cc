@@ -35,7 +35,7 @@ dns_firewall::IpsOption::IpsOption( const std::string& config_filename )
     }
     std::cout << "[DNS Firewall]    - model-file: " << options.model_file << std::endl;
     std::cout << "[DNS Firewall]    - window widths: ";
-    for( auto it = model.entropy_distribution.begin(); it != model.entropy_distribution.end();
+    for( auto it = model.get_entropy_distribution().begin(); it != model.get_entropy_distribution().end();
          ++it ) {
         std::cout << it->first << " ";
         dns_classifiers.push_back( entropy::DnsClassifier( it->first, it->second.size() ) );

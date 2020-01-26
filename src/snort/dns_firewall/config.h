@@ -23,37 +23,32 @@ namespace snort
 namespace dns_firewall
 {
 
-class Config
+struct Config
 {
-  public:
     enum Mode
     {
         SIMPLE,
         LIVE
     };
-    class HmmConfig
+    struct HmmConfig
     {
-      public:
         unsigned weight;
         bool operator==( const HmmConfig& ) const;
     };
-    class EntropyConfig
+    struct EntropyConfig
     {
-      public:
         unsigned weight;
         bool operator==( const EntropyConfig& ) const;
     };
-    class LengthConfig
+    struct LengthConfig
     {
-      public:
         unsigned min_length;
         unsigned max_length;
         double max_length_penalty;
         bool operator==( const LengthConfig& ) const;
     };
-    class RejectConfig
+    struct RejectConfig
     {
-      public:
         unsigned block_period;
         int threshold;
         unsigned repetitions;

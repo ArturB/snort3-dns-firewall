@@ -26,18 +26,15 @@ namespace dns_firewall
 namespace trainer
 {
 
-class Config
+struct Config
 {
-  public:
-    class HmmConfig
+    struct HmmConfig
     {
-      public:
         unsigned hidden_states;
         bool operator==( const HmmConfig& ) const;
     };
-    class EntropyConfig
+    struct EntropyConfig
     {
-      public:
         unsigned bins;
         snort::dns_firewall::DistributionScale scale;
         std::vector<unsigned> window_widths;

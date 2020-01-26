@@ -23,12 +23,10 @@ namespace snort
 namespace dns_firewall
 {
 
-class DnsPacket
+struct DnsPacket
 {
-  public:
-    class Question
+    struct Question
     {
-      public:
         unsigned qlen;
         std::string qname;
         unsigned qtype;

@@ -22,7 +22,7 @@ namespace dns_firewall
 namespace entropy
 {
 
-DnsClassifier::DnsClassifier( unsigned window_width, unsigned bins )
+DnsClassifier::DnsClassifier( unsigned window_width, unsigned bins ) noexcept
     : window_width_( window_width )
     , entropy_distribution_( bins, 0 )
     , dist_bins_( bins )
@@ -35,7 +35,7 @@ DnsClassifier::DnsClassifier( unsigned window_width, unsigned bins )
 // Get x-level suffix of DNS domain from string
 // e.g. for GetDnsFld(s2.smtp.google.com, 2) function returns google.com
 // dont work for empty string
-std::string DnsClassifier::get_dns_xld( const std::string& domain, unsigned level )
+std::string DnsClassifier::get_dns_xld( const std::string& domain, unsigned level ) noexcept
 {
     char delimiter             = '.';
     unsigned delimiters_passed = 0;
@@ -46,11 +46,11 @@ std::string DnsClassifier::get_dns_xld( const std::string& domain, unsigned leve
                 return domain.substr( i + 1, domain.size() );
         }
     }
-    return std::string( domain );
+    return domain;
 }
 
 // Calculates given metric for one domain
-double DnsClassifier::domain_metric( unsigned domain_val ) const
+double DnsClassifier::domain_metric( unsigned domain_val ) const noexcept
 {
     if( domain_val == 0 ) {
         return 0.0;
@@ -62,7 +62,7 @@ double DnsClassifier::domain_metric( unsigned domain_val ) const
 }
 
 // Calculate given metric for dns_fifo
-double DnsClassifier::fifo_metric() const
+double DnsClassifier::fifo_metric() const noexcept
 {
     double metric_value = 0;
     for( auto it = freq_.begin(); it != freq_.end(); ++it ) {
@@ -73,7 +73,7 @@ double DnsClassifier::fifo_metric() const
 
 // Insert new domain to window
 // Updates current_metric value
-void DnsClassifier::insert( const std::string& domain )
+void DnsClassifier::insert( const std::string& domain ) noexcept
 {
     dns_fifo_.push( domain );
     ++freq_[domain];
@@ -83,7 +83,7 @@ void DnsClassifier::insert( const std::string& domain )
 
 // Pop domain from window
 // Updates current_metric value
-void DnsClassifier::pop()
+void DnsClassifier::pop() noexcept
 {
     std::string domain = dns_fifo_.front();
     // Pop domain
@@ -95,7 +95,7 @@ void DnsClassifier::pop()
 }
 
 // Shift window to new domain
-void DnsClassifier::forward_shift( const std::string& domain ) // 53 cycles
+void DnsClassifier::forward_shift( const std::string& domain ) noexcept // 53 cycles
 {
     std::string popped = dns_fifo_.front(); // 20 cycles
 
@@ -136,6 +136,7 @@ void DnsClassifier::forward_shift( const std::string& domain ) // 53 cycles
 
 std::vector<double>
 DnsClassifier::get_entropy_distribution( snort::dns_firewall::DistributionScale scale ) const
+  noexcept
 {
     std::vector<double> distribution_values = std::vector<double>( dist_bins_, 0 );
 
@@ -162,8 +163,9 @@ DnsClassifier::get_entropy_distribution( snort::dns_firewall::DistributionScale 
     return distribution_values;
 }
 
-void DnsClassifier::set_entropy_distribution( const std::vector<double>& dist, unsigned weight,
-                                              snort::dns_firewall::DistributionScale scale )
+void DnsClassifier::set_entropy_distribution(
+  const std::vector<double>& dist, unsigned weight,
+  snort::dns_firewall::DistributionScale scale )
 {
     dist_bins_ = dist.size();
 
@@ -178,17 +180,17 @@ void DnsClassifier::set_entropy_distribution( const std::vector<double>& dist, u
     entropy_distribution_ = distribution_values;
 }
 
-unsigned DnsClassifier::get_distribution_bins() const
+unsigned DnsClassifier::get_distribution_bins() const noexcept
 {
     return dist_bins_;
 }
 
-unsigned DnsClassifier::get_window_width() const
+unsigned DnsClassifier::get_window_width() const noexcept
 {
     return window_width_;
 }
 
-void DnsClassifier::learn( const std::string& domain )
+void DnsClassifier::learn( const std::string& domain ) noexcept
 {
     if( state_shift_ ) {
         forward_shift( get_dns_xld( domain, 2 ) );
@@ -202,13 +204,10 @@ void DnsClassifier::learn( const std::string& domain )
     }
 }
 
-double DnsClassifier::classify( const std::string& domain, DistributionScale scale )
+double DnsClassifier::classify( const std::string& domain, DistributionScale scale ) noexcept
 {
     if( not state_shift_ ) {
         insert( get_dns_xld( domain, 2 ) );
-        // std::cout << "Insert " << get_dns_xld( domain, 2 )
-        //           << ", dns_fifo.size() = " << dns_fifo_.size()
-        //           << ", win_wid = " << window_width_ << std::endl;
         if( dns_fifo_.size() >= window_width_ ) {
             state_shift_ = true;
         }

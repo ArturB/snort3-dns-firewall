@@ -45,7 +45,7 @@ class DnsClassifier
     std::queue<std::string> dns_fifo_; // FIFO queue of processed domains
     unsigned dns_fifo_size_;           // Memoized size of above FIFO queue
     double current_metric_;            // Memoized concentration metric of current FIFO
-    unsigned window_width_;            // Target window width
+    unsigned window_width_;            // Max FIFO size
     std::unordered_map<std::string, unsigned> freq_; // Mapping from FLDs to its frequencies
 
     // Entropy probability distribution
@@ -55,53 +55,51 @@ class DnsClassifier
     unsigned dist_bins_;     // Number of bins in entropy distribution
 
     // Statistics
-    bool state_shift_; // If true, domain are shifted with pop
+    bool state_shift_; // If true, maximal size of FIFO queue is reached and domains are shifted
+                       // using pop
 
   private:
     // Get x-level suffix of DNS domain from string
     // e.g. for GetDnsFld(s2.smtp.google.com, 2) function returns google.com
     // dont work for empty string
-    std::string get_dns_xld( const std::string&, unsigned );
+    static std::string get_dns_xld( const std::string&, unsigned ) noexcept;
 
     // Calculates given metric for one FLD
-    double domain_metric( unsigned ) const;
+    double domain_metric( unsigned ) const noexcept;
 
     // Calculate given metric for dns_fifo
-    double fifo_metric() const;
+    double fifo_metric() const noexcept;
 
     // Insert new domain to window
     // Updates current_metric value
-    void insert( const std::string& );
+    void insert( const std::string& ) noexcept;
 
     // Pop domain from window
     // Updates current_metric value
-    void pop();
+    void pop() noexcept;
 
     // Shift window to new domain
-    void forward_shift( const std::string& );
-
-    // Get estimated probability of domain/fifo
-    // double log_probability( const std::string& );
+    void forward_shift( const std::string& ) noexcept;
 
   public:
     // Default constructor
-    explicit DnsClassifier( unsigned window_width, unsigned dist_bins );
+    DnsClassifier( unsigned window_width, unsigned dist_bins ) noexcept;
 
     // Get entropy distribution
-    std::vector<double>
-      get_entropy_distribution( snort::dns_firewall::DistributionScale ) const;
+    std::vector<double> get_entropy_distribution( snort::dns_firewall::DistributionScale ) const
+      noexcept;
     // Set entropy distribution
     void set_entropy_distribution( const std::vector<double>&, unsigned,
                                    snort::dns_firewall::DistributionScale );
     // Get number of distribution bins
-    unsigned get_distribution_bins() const;
+    unsigned get_distribution_bins() const noexcept;
     // Get current window width
-    unsigned get_window_width() const;
+    unsigned get_window_width() const noexcept;
 
     // Learn classifier with one DNS domain
-    void learn( const std::string& );
+    void learn( const std::string& ) noexcept;
     // Classify DNS domain
-    double classify( const std::string&, snort::dns_firewall::DistributionScale );
+    double classify( const std::string&, snort::dns_firewall::DistributionScale ) noexcept;
 };
 
 } // namespace entropy

@@ -40,7 +40,7 @@ require_library(yaml-cpp "")
 option ( ENABLE_DEBUG "Enable debugging options (bugreports and developers only)" OFF )
 option ( ENABLE_RELEASE "Enable compiler -O3 optimization flags" ON )
 
-set( CMAKE_CXX_FLAGS "-fPIC " )
+set( CMAKE_CXX_FLAGS "" )
 if ( ENABLE_DEBUG )
     set( CMAKE_BUILD_TYPE "DEBUG" )
     string ( APPEND CMAKE_CXX_FLAGS "-g -DDEBUG " )
