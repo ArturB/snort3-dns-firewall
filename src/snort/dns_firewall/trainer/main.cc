@@ -144,7 +144,7 @@ int main( int argc, char* const argv[] ) {
     snort::dns_firewall::Model model;
     for( unsigned i = 0; i < fifos.size(); ++i ) {
         unsigned win_width = fifos[i].get_window_width();
-        model.get_entropy_distribution()[win_width] =
+        model.entropy_distribution[win_width] =
           fifos[i].get_entropy_distribution( options.entropy.scale );
     }
 

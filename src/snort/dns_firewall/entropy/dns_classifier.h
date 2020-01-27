@@ -95,7 +95,7 @@ class DnsClassifier
     // Learn classifier with one DNS domain
     void learn( const std::string& ) noexcept;
     // Classify DNS domain
-    double classify( const std::string&, snort::dns_firewall::DistributionScale ) noexcept;
+    double classify( const std::string& ) noexcept;
 };
 
 }}} // namespace snort::dns_firewall::entropy

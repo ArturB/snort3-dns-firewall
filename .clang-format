@@ -22,7 +22,7 @@ BraceWrapping:
     AfterClass: true
     AfterControlStatement: false
     AfterEnum: true
-    AfterFunction: false
+    AfterFunction: true
     AfterNamespace: false
     AfterStruct: true
     AfterUnion: true
@@ -37,7 +37,7 @@ BraceWrapping:
 # Single-liners
 AllowAllArgumentsOnNextLine: true
 AllowAllConstructorInitializersOnNextLine: true
-AllowAllParametersOfDeclarationOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: true
 AllowShortBlocksOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: false

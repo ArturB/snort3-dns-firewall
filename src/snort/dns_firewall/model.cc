@@ -23,17 +23,20 @@
 namespace snort { namespace dns_firewall {
 
 Model::Model()
-    : bins( 0 ) {
+    : bins( 0 )
+{
 }
 
-void Model::save( std::string filename ) {
+void Model::save( std::string filename )
+{
     std::ofstream fs( filename );
     cereal::BinaryOutputArchive oarchive( fs );
     oarchive( bins, entropy_distribution );
     fs.close();
 }
 
-void Model::load( std::string filename ) {
+void Model::load( std::string filename )
+{
     std::ifstream fs( filename );
     cereal::BinaryInputArchive iarchive( fs );
     iarchive( bins, entropy_distribution );
@@ -41,7 +44,8 @@ void Model::load( std::string filename ) {
 }
 
 void Model::save_graphs( const std::string& filename_prefix,
-                         const std::string& filename_suffix ) {
+                         const std::string& filename_suffix )
+{
     for( auto it = entropy_distribution.begin(); it != entropy_distribution.end(); ++it ) {
         std::ofstream fs( filename_prefix + std::to_string( it->first ) + filename_suffix );
         for( unsigned i = 0; i < it->second.size(); ++i ) {
@@ -49,15 +53,6 @@ void Model::save_graphs( const std::string& filename_prefix,
         }
         fs.close();
     }
-}
-
-unsigned Model::get_bins() const noexcept {
-    return bins;
-}
-
-std::unordered_map<unsigned, std::vector<double>> Model::get_entropy_distribution() const
-  noexcept {
-    return entropy_distribution;
 }
 
 }} // namespace snort::dns_firewall

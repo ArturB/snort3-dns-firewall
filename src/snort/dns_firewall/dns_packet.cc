@@ -13,45 +13,40 @@
 // **********************************************************************
 
 #include "dns_packet.h"
+#include <cstring>
 
 namespace snort { namespace dns_firewall {
 
-DnsPacket::DnsPacket( Packet* p )
-    : id( ( p->data[0] << 8 ) + p->data[1] )
-    , flags( ( p->data[2] << 8 ) + p->data[3] )
-    , question_num( ( p->data[4] << 8 ) + p->data[5] )
-    , answer_num( ( p->data[6] << 8 ) + p->data[7] )
-    , authority_num( ( p->data[8] << 8 ) + p->data[9] )
-    , additional_num( ( p->data[10] << 8 ) + p->data[11] )
+DnsPacket::DnsPacket( const uint8_t* data, unsigned dsize )
+    : id( ( data[0] << 8 ) + data[1] )
+    , flags( ( data[2] << 8 ) + data[3] )
+    , question_num( ( data[4] << 8 ) + data[5] )
+    , answer_num( ( data[6] << 8 ) + data[7] )
+    , authority_num( ( data[8] << 8 ) + data[9] )
+    , additional_num( ( data[10] << 8 ) + data[11] )
     , malformed( false )
-    , questions() {
-    int cursor_pos = 12;
-    for( int i = 0; i < this->question_num; ++i ) {
+    , questions()
+{
+    unsigned cursor_pos = 12;
+    for( unsigned i = 0; i < this->question_num; ++i ) {
         DnsPacket::Question q;
-        unsigned char buf[255];
-        buf[0] = 0;
+        while( cursor_pos < dsize && data[cursor_pos] &&
+               cursor_pos + data[cursor_pos] < dsize ) {
 
-        while( cursor_pos < p->dsize && p->data[cursor_pos] &&
-               cursor_pos + p->data[cursor_pos] < p->dsize ) {
-
-            strncat(
-              (char*) &buf[q.qlen], (char*) &( p->data[cursor_pos + 1] ), p->data[cursor_pos] );
-            q.qlen += p->data[cursor_pos] + 1;
-            strcat( (char*) &buf[q.qlen - 1], "." );
-            cursor_pos += 1 + p->data[cursor_pos];
+            for( unsigned j = 0; j < data[cursor_pos]; ++j ) {
+                q.qname.push_back( data[cursor_pos + 1 + j] );
+            }
+            q.qname.push_back( '.' );
+            q.qlen += data[cursor_pos] + 1;
+            cursor_pos += 1 + data[cursor_pos];
         }
-
-        if( p->data[cursor_pos] != 0 || cursor_pos + 5 > p->dsize ) {
+        if( data[cursor_pos] != 0 || cursor_pos + 5 > dsize ) {
             malformed = true;
             break;
         }
-
+        q.qname.pop_back();
         --q.qlen;
-        q.qtype = ( p->data[cursor_pos + 1] << 8 ) + p->data[cursor_pos + 2];
-
-        for( unsigned j = 0; j < q.qlen; ++j ) {
-            q.qname.push_back( std::tolower( buf[j] ) );
-        }
+        q.qtype = ( data[cursor_pos + 1] << 8 ) + data[cursor_pos + 2];
         questions.push_back( q );
     }
 }

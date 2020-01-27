@@ -5,15 +5,15 @@ plugin:
     blacklist: ""
     length:
         min-length: 8
-        max-length: 40
-        max-length-penalty: 1.5
+        max-length: 50
+        max-length-penalty: 1
     hmm:
         weight: 10
     entropy:
         weight: 10
     short-reject:
         block-period: 5
-        threshold: -3
+        threshold: -4
         repetitions: 1
     long-reject:
         block-period: 60

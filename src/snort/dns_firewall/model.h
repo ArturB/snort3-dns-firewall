@@ -20,19 +20,15 @@
 
 namespace snort { namespace dns_firewall {
 
-class Model
+struct Model
 {
-  private:
     unsigned bins;
     std::unordered_map<unsigned, std::vector<double>> entropy_distribution;
 
-  public:
     Model();
     void save( std::string filename );
     void load( std::string filename );
     void save_graphs( const std::string&, const std::string& = ".csv" );
-    unsigned get_bins() const noexcept;
-    std::unordered_map<unsigned, std::vector<double>> get_entropy_distribution() const noexcept;
 };
 
 }} // namespace snort::dns_firewall

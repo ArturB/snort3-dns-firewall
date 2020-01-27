@@ -15,8 +15,8 @@
 #ifndef SNORT_DNS_FIREWALL_DNS_CODEC_H
 #define SNORT_DNS_FIREWALL_DNS_CODEC_H
 
-#include "protocols/packet.h"
-#include "protocols/udp.h"
+#include <string>
+#include <vector>
 
 namespace snort { namespace dns_firewall {
 
@@ -31,11 +31,12 @@ struct DnsPacket
         Question()
             : qlen( 0 )
             , qtype( 0 )
-            , qclass( 0 ) {
+            , qclass( 0 )
+        {
         }
     };
 
-    explicit DnsPacket( snort::Packet* p );
+    explicit DnsPacket( const uint8_t*, unsigned );
 
     u_int16_t id;
     u_int16_t flags;
