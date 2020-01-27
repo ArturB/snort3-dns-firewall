@@ -46,4 +46,21 @@ bool Classification::operator>( const Classification& operand2 ) const
     return note > operand2.note || score > operand2.score;
 }
 
+std::ostream& operator<<( std::ostream& os, const Classification& cls )
+{
+    if( cls.note == Classification::Note::BLACKLIST ) {
+        os << "[DNS Firewall] " << cls.domain << " BLACKLIST";
+    }
+    if( cls.note == Classification::Note::WHITELIST ) {
+        os << "[DNS Firewall] " << cls.domain << " WHITELIST";
+    }
+    if( cls.note == Classification::Note::MIN_LENGTH ) {
+        os << "[DNS Firewall] " << cls.domain << " TOO SHORT";
+    }
+    if( cls.note == Classification::Note::SCORE ) {
+        os << "[DNS Firewall] " << cls.domain << " SCORE " << cls.score;
+    }
+    return os;
+}
+
 }} // namespace snort::dns_firewall

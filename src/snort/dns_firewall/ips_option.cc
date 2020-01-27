@@ -21,6 +21,9 @@ dns_firewall::IpsOption::IpsOption( const std::string& config_filename )
     , classifier( options )
     , snort::IpsOption( "dns_firewall" )
 {
+    // Print current confiuguration
+    std::cout << "[DNS Firewall] Current configuration: " << std::endl;
+    std::cout << options << std::endl;
 }
 
 uint32_t dns_firewall::IpsOption::hash() const
@@ -43,26 +46,15 @@ snort::IpsOption::EvalStatus dns_firewall::IpsOption::eval( Cursor&, Packet* p )
     }
 
     Classification cls = classifier.classify( dns );
-    // std::cout << cls.domain << ", note = " << cls.note << ", score = " << cls.score
-    //           << std::endl;
-    if( cls.note == Classification::Note::BLACKLIST ) {
-        std::cout << "[DNS Firewall] " << cls.domain << " REJECT (blacklist)" << std::endl;
+    if( cls.note == Classification::Note::WHITELIST ||
+        cls.note == Classification::Note::MIN_LENGTH ) {
+        std::cout << cls << " ACCEPT" << std::endl;
+        return NO_MATCH;
+    }
+    if( cls.note == Classification::Note::BLACKLIST ||
+        cls.score < options.short_reject.threshold ) {
+        std::cout << cls << " REJECT" << std::endl;
         return MATCH;
-    }
-    if( cls.note == Classification::Note::WHITELIST ) {
-        std::cout << "[DNS Firewall] " << cls.domain << " ACCEPT (whitelist)" << std::endl;
-        return NO_MATCH;
-    }
-    if( cls.note == Classification::Note::MIN_LENGTH ) {
-        std::cout << "[DNS Firewall] " << cls.domain << " ACCEPT (too short)" << std::endl;
-        return NO_MATCH;
-    }
-    if( cls.note == Classification::Note::SCORE ) {
-        if( cls.score < options.short_reject.threshold ) {
-            std::cout << "[DNS Firewall] " << cls.domain << " REJECT (score = " << cls.score
-                      << ")" << std::endl;
-            return MATCH;
-        }
     }
     return NO_MATCH; // should never execute
 }

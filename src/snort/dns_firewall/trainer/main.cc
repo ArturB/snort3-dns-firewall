@@ -24,12 +24,12 @@ using namespace snort::dns_firewall;
 // ----------------
 // ENTRYPOINT
 // ----------------
-int main( int argc, char* const argv[] ) {
-    std::cout << "snort3trainer 0.1.1 by Artur M. Brodzki" << std::endl;
+int main( int argc, char* const argv[] )
+{
+    std::cout << "snort3trainer 0.1.1 by Artur M. Brodzki" << std::endl << std::endl;
     std::string help =
-      "\n"
       "Usage:\n"
-      "   -c: YAML config file name (mandatory)\n"
+      "   -c: YAML config file name (mandatory)\n\n"
       "       If -f, -n, -o option is specified, configuration\n"
       "       from YAML file is overwritten.\n\n"
       "   -f: File name of the dataset to process\n"
@@ -37,7 +37,7 @@ int main( int argc, char* const argv[] ) {
       "   -o: Model file name\n"
       "   -h: Print this help\n";
 
-    // Load config.yaml file
+    // Parse command line options
     int opt;
     bool save_graphs = false;
     std::string yaml_filename_getopt;
@@ -72,6 +72,7 @@ int main( int argc, char* const argv[] ) {
         std::cout << help << std::endl;
         exit( 1 );
     }
+    // Load config file
     std::cout << "Config file: " << yaml_filename_getopt << std::endl;
     trainer::Config options = trainer::Config( yaml_filename_getopt );
     if( dataset_filename_getopt != "" ) {
@@ -83,19 +84,8 @@ int main( int argc, char* const argv[] ) {
     if( max_lines_getopt != -1 ) {
         options.max_lines = max_lines_getopt;
     }
-
     // Load and print trainer options
-    std::cout << std::endl << "Dataset file name = " << options.dataset << std::endl;
-    std::cout << "Window sizes = ";
-    for( unsigned i = 0; i < options.entropy.window_widths.size(); ++i ) {
-        std::cout << options.entropy.window_widths[i] << " ";
-    }
-    std::cout << std::endl;
-    std::cout << "Distribution Bins = " << options.entropy.bins << std::endl;
-    std::cout << "Output file name = " << options.model_file << std::endl;
-    if( options.entropy.scale == snort::dns_firewall::DistributionScale::LOG ) {
-        std::cout << std::endl << "Generating log-scale distribution..." << std::endl;
-    }
+    std::cout << options << std::endl << std::endl;
 
     // Create line_processor objects
     std::vector<entropy::DnsClassifier> fifos;
@@ -103,7 +93,6 @@ int main( int argc, char* const argv[] ) {
         fifos.push_back(
           entropy::DnsClassifier( options.entropy.window_widths[i], options.entropy.bins ) );
     }
-
     // Process data line by line
     std::ifstream dataset_file( options.dataset );
     std::string line;

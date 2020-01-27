@@ -24,63 +24,26 @@ DnsClassifier::DnsClassifier( const Config& config )
     Model model;
     model.load( options.model_file );
 
-    std::cout << "[DNS Firewall] Current configuration:" << std::endl;
-
-    if( options.mode == Config::Mode::LIVE ) {
-        std::cout << "[DNS Firewall]    - mode: live" << std::endl;
-    }
-    if( options.mode == Config::Mode::SIMPLE ) {
-        std::cout << "[DNS Firewall]    - mode: simple" << std::endl;
-    }
-
-    std::cout << "[DNS Firewall]    - model-file: " << options.model_file << std::endl;
-    std::cout << "[DNS Firewall]    - blacklist file: " << options.blacklist << std::endl;
+    // Initialize blacklist
     std::ifstream blacklist_file( options.blacklist );
     std::string line;
     while( std::getline( blacklist_file, line ) ) {
         blacklist.push_back( line );
     }
     blacklist_file.close();
-    std::cout << "[DNS Firewall]      blacklisted domains: " << blacklist.size() << std::endl;
-
-    std::cout << "[DNS Firewall]    - whitelist file: " << options.whitelist << std::endl;
+    // Initialize whitelist
     std::ifstream whitelist_file( options.whitelist );
     while( getline( whitelist_file, line ) ) {
         whitelist.push_back( line );
     }
     whitelist_file.close();
-    std::cout << "[DNS Firewall]      whitelisted domains: " << whitelist.size() << std::endl;
-
-    std::cout << "[DNS Firewall]    - window widths: ";
+    // Initialize entropy clasifiers
     for( auto it = model.entropy_distribution.begin(); it != model.entropy_distribution.end();
          ++it ) {
-        std::cout << it->first << " ";
         entropy_classifiers.push_back( entropy::DnsClassifier( it->first, it->second.size() ) );
         entropy_classifiers.back().set_entropy_distribution(
           it->second, 1000000, DistributionScale::LOG );
     }
-
-    std::cout << std::endl;
-    std::cout << "[DNS Firewall]    - min-length: " << options.length.min_length << std::endl;
-    std::cout << "[DNS Firewall]    - max-length: " << options.length.max_length << std::endl;
-    std::cout << "[DNS Firewall]    - max-length-penalty: " << options.length.max_length_penalty
-              << std::endl;
-
-    std::cout << "[DNS Firewall]    - hmm-weight: " << options.hmm.weight << std::endl;
-    std::cout << "[DNS Firewall]    - entropy-weight: " << options.entropy.weight << std::endl;
-
-    std::cout << "[DNS Firewall]    - short-reject.block-period: "
-              << options.short_reject.block_period << std::endl;
-    std::cout << "[DNS Firewall]    - short-reject.threshold: "
-
-              << options.short_reject.threshold << std::endl;
-    std::cout << "[DNS Firewall]    - long-reject.block-period: "
-              << options.long_reject.block_period << std::endl;
-    std::cout << "[DNS Firewall]    - long-reject.threshold: " << options.long_reject.threshold
-              << std::endl;
-
-    std::cout << "[DNS Firewall]    - permanent-reject.threshold: "
-              << options.permanent_reject.threshold << std::endl;
 }
 
 Classification DnsClassifier::classify_question( const std::string& domain )

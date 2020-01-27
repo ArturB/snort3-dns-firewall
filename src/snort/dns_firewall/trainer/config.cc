@@ -17,22 +17,43 @@
 
 namespace snort { namespace dns_firewall { namespace trainer {
 
-bool Config::EntropyConfig::operator==( const Config::EntropyConfig& operand2 ) const {
+bool Config::EntropyConfig::operator==( const Config::EntropyConfig& operand2 ) const
+{
     return bins == operand2.bins && scale == operand2.scale &&
            window_widths == operand2.window_widths;
 }
 
-bool Config::HmmConfig::operator==( const Config::HmmConfig& operand2 ) const {
+std::ostream& operator<<( std::ostream& os, const Config::EntropyConfig& entropy )
+{
+    os << "   * distribution bins: " << entropy.bins << std::endl;
+    os << "   * distribution scale: " << entropy.scale << std::endl;
+    os << "   * window widths: ";
+    for( auto it = entropy.window_widths.begin(); it != entropy.window_widths.end(); ++it ) {
+        os << *it << " ";
+    }
+    return os;
+}
+
+bool Config::HmmConfig::operator==( const Config::HmmConfig& operand2 ) const
+{
     return hidden_states == operand2.hidden_states;
 }
 
-bool Config::operator==( const Config& operand2 ) const {
+std::ostream& operator<<( std::ostream& os, const Config::HmmConfig& hmm )
+{
+    os << "   * hidden states: " << hmm.hidden_states;
+    return os;
+}
+
+bool Config::operator==( const Config& operand2 ) const
+{
     return dataset == operand2.dataset && model_file == operand2.model_file &&
            max_lines == operand2.max_lines && hmm == operand2.hmm &&
            entropy == operand2.entropy;
 }
 
-Config::Config( const std::string& config_filename ) {
+Config::Config( const std::string& config_filename )
+{
     YAML::Node node = YAML::LoadFile( config_filename );
 
     dataset    = node["trainer"]["dataset"].as<std::string>();
@@ -54,6 +75,18 @@ Config::Config( const std::string& config_filename ) {
     for( auto it = win_widths.begin(); it != win_widths.end(); ++it ) {
         entropy.window_widths.push_back( it->as<int>() );
     }
+}
+
+std::ostream& operator<<( std::ostream& os, const Config& options )
+{
+    os << " - dataset file: " << options.dataset << std::endl;
+    os << " - output model file: " << options.model_file << std::endl;
+    os << " - max lines processed: " << options.max_lines << std::endl;
+    os << " - Entropy classifier: " << std::endl;
+    os << options.entropy << std::endl;
+    os << " - HMM classifier: " << std::endl;
+    os << options.hmm;
+    return os;
 }
 
 }}} // namespace snort::dns_firewall::trainer

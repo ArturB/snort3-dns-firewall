@@ -27,6 +27,7 @@ struct Config
     {
         unsigned hidden_states;
         bool operator==( const HmmConfig& ) const;
+        friend std::ostream& operator<<( std::ostream&, const HmmConfig& );
     };
     struct EntropyConfig
     {
@@ -34,6 +35,7 @@ struct Config
         snort::dns_firewall::DistributionScale scale;
         std::vector<unsigned> window_widths;
         bool operator==( const EntropyConfig& ) const;
+        friend std::ostream& operator<<( std::ostream&, const EntropyConfig& );
     };
 
     std::string dataset;
@@ -44,6 +46,7 @@ struct Config
 
     explicit Config( const std::string& );
     bool operator==( const Config& ) const;
+    friend std::ostream& operator<<( std::ostream&, const Config& );
 };
 
 }}} // namespace snort::dns_firewall::trainer

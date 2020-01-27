@@ -27,6 +27,7 @@ add_library (
     ${LIBRARY_NAME} MODULE
         snort/dns_firewall/classification.cc
         snort/dns_firewall/config.cc
+        snort/dns_firewall/distribution_scale.cc
         snort/dns_firewall/dns_classifier.cc
         snort/dns_firewall/dns_packet.cc
         snort/dns_firewall/ips_option.cc
@@ -49,6 +50,7 @@ install (
 
 add_executable(
     ${TRAINER_NAME}
+        snort/dns_firewall/distribution_scale.cc
         snort/dns_firewall/model.cc
         snort/dns_firewall/entropy/dns_classifier.cc
         snort/dns_firewall/hmm/dns_classifier.cc

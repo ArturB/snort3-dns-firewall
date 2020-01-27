@@ -16,6 +16,7 @@
 #define SNORT_DNS_FIREWALL_CONFIG_H
 
 #include <string>
+#include <ostream>
 
 namespace snort { namespace dns_firewall {
 
@@ -26,15 +27,24 @@ struct Config
         SIMPLE,
         LIVE
     };
+    struct TimeframeConfig
+    {
+        unsigned period;
+        unsigned max_queries;
+        bool operator==( const TimeframeConfig& ) const;
+        friend std::ostream& operator<<( std::ostream&, const TimeframeConfig& );
+    };
     struct HmmConfig
     {
         unsigned weight;
         bool operator==( const HmmConfig& ) const;
+        friend std::ostream& operator<<( std::ostream&, const HmmConfig& );
     };
     struct EntropyConfig
     {
         unsigned weight;
         bool operator==( const EntropyConfig& ) const;
+        friend std::ostream& operator<<( std::ostream&, const EntropyConfig& );
     };
     struct LengthConfig
     {
@@ -42,6 +52,7 @@ struct Config
         unsigned max_length;
         double max_length_penalty;
         bool operator==( const LengthConfig& ) const;
+        friend std::ostream& operator<<( std::ostream&, const LengthConfig& );
     };
     struct RejectConfig
     {
@@ -49,12 +60,14 @@ struct Config
         int threshold;
         unsigned repetitions;
         bool operator==( const RejectConfig& ) const;
+        friend std::ostream& operator<<( std::ostream&, const RejectConfig& );
     };
 
     Mode mode;
     std::string model_file;
     std::string blacklist;
     std::string whitelist;
+    TimeframeConfig timeframe;
     HmmConfig hmm;
     EntropyConfig entropy;
     LengthConfig length;
@@ -64,7 +77,10 @@ struct Config
 
     explicit Config( const std::string& );
     bool operator==( const Config& ) const;
+    friend std::ostream& operator<<( std::ostream&, const Config& );
 };
+
+std::ostream& operator<<( std::ostream&, const Config::Mode& );
 
 }} // namespace snort::dns_firewall
 

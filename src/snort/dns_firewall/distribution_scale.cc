@@ -12,36 +12,19 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
-#ifndef SNORT_DNS_FIREWALL_CLASSIFICATION_H
-#define SNORT_DNS_FIREWALL_CLASSIFICATION_H
-
-#include <string>
-#include <ostream>
+#include "distribution_scale.h"
 
 namespace snort { namespace dns_firewall {
 
-struct Classification
+std::ostream& operator<<( std::ostream& os, const DistributionScale& ds )
 {
-    enum Note
-    {
-        BLACKLIST,
-        WHITELIST,
-        MIN_LENGTH,
-        SCORE
-    };
-
-    std::string domain;
-    Note note;
-    double score;
-
-    Classification();
-    Classification( const std::string&, Classification::Note, double );
-    bool operator==( const Classification& ) const;
-    bool operator<( const Classification& ) const;
-    bool operator>( const Classification& ) const;
-    friend std::ostream& operator<<( std::ostream&, const Classification& );
-};
+    if( ds == DistributionScale::LINEAR ) {
+        os << "linear";
+    }
+    if( ds == DistributionScale::LOG ) {
+        os << "log";
+    }
+    return os;
+}
 
 }} // namespace snort::dns_firewall
-
-#endif // SNORT_DNS_FIREWALL_CLASSIFICATION_H

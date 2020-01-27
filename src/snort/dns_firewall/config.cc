@@ -17,33 +17,80 @@
 
 namespace snort { namespace dns_firewall {
 
-bool Config::HmmConfig::operator==( const Config::HmmConfig& operand2 ) const {
+std::ostream& operator<<( std::ostream& os, const Config::Mode& mode )
+{
+    if( mode == Config::Mode::SIMPLE ) {
+        os << "simple";
+    }
+    if( mode == Config::Mode::LIVE ) {
+        os << "live";
+    }
+    return os;
+}
+
+bool Config::TimeframeConfig::operator==( const Config::TimeframeConfig& operand2 ) const
+{
+    return period == operand2.period && max_queries == operand2.max_queries;
+}
+
+std::ostream& operator<<( std::ostream& os, const Config::TimeframeConfig& timeframe )
+{
+    os << "[DNS Firewall]    * period: " << timeframe.period << std::endl;
+    os << "[DNS Firewall]    * max-queries: " << timeframe.max_queries;
+    return os;
+}
+
+bool Config::HmmConfig::operator==( const Config::HmmConfig& operand2 ) const
+{
     return weight == operand2.weight;
 }
 
-bool Config::EntropyConfig::operator==( const Config::EntropyConfig& operand2 ) const {
+std::ostream& operator<<( std::ostream& os, const Config::HmmConfig& hmm )
+{
+    os << "[DNS Firewall]    * weight: " << hmm.weight;
+    return os;
+}
+
+bool Config::EntropyConfig::operator==( const Config::EntropyConfig& operand2 ) const
+{
     return weight == operand2.weight;
 }
 
-bool Config::LengthConfig::operator==( const Config::LengthConfig& operand2 ) const {
+std::ostream& operator<<( std::ostream& os, const Config::EntropyConfig& entropy )
+{
+    os << "[DNS Firewall]    * weight: " << entropy.weight;
+    return os;
+}
+
+bool Config::LengthConfig::operator==( const Config::LengthConfig& operand2 ) const
+{
     return min_length == operand2.min_length && max_length == operand2.max_length &&
            max_length_penalty == operand2.max_length_penalty;
 }
 
-bool Config::RejectConfig::operator==( const Config::RejectConfig& operand2 ) const {
+std::ostream& operator<<( std::ostream& os, const Config::LengthConfig& length )
+{
+    os << "[DNS Firewall]    * min-length: " << length.min_length << std::endl;
+    os << "[DNS Firewall]    * max-length: " << length.max_length << std::endl;
+    os << "[DNS Firewall]    * max-length-penalty: " << length.max_length_penalty;
+    return os;
+}
+
+bool Config::RejectConfig::operator==( const Config::RejectConfig& operand2 ) const
+{
     return block_period == operand2.block_period && threshold == operand2.threshold &&
            repetitions == operand2.repetitions;
 }
 
-bool Config::operator==( const Config& operand2 ) const {
-    return mode == operand2.mode && model_file == operand2.model_file &&
-           blacklist == operand2.blacklist && whitelist == operand2.whitelist &&
-           hmm == operand2.hmm && entropy == operand2.entropy && length == operand2.length &&
-           short_reject == operand2.short_reject && long_reject == operand2.long_reject &&
-           permanent_reject == operand2.permanent_reject;
+std::ostream& operator<<( std::ostream& os, const Config::RejectConfig& reject )
+{
+    os << "[DNS Firewall]    * block-period: " << reject.block_period << std::endl;
+    os << "[DNS Firewall]    * threshold: " << reject.threshold;
+    return os;
 }
 
-Config::Config( const std::string& config_filename ) {
+Config::Config( const std::string& config_filename )
+{
     YAML::Node node = YAML::LoadFile( config_filename );
 
     if( node["plugin"]["mode"].as<std::string>() == "simple" ) {
@@ -56,6 +103,9 @@ Config::Config( const std::string& config_filename ) {
     model_file = node["plugin"]["model-file"].as<std::string>();
     whitelist  = node["plugin"]["whitelist"].as<std::string>();
     blacklist  = node["plugin"]["blacklist"].as<std::string>();
+
+    timeframe.period      = node["plugin"]["timeframe"]["period"].as<int>();
+    timeframe.max_queries = node["plugin"]["timeframe"]["max-queries"].as<int>();
 
     length.min_length         = node["plugin"]["length"]["min-length"].as<int>();
     length.max_length         = node["plugin"]["length"]["max-length"].as<int>();
@@ -74,6 +124,40 @@ Config::Config( const std::string& config_filename ) {
 
     permanent_reject.threshold   = node["plugin"]["permanent-reject"]["threshold"].as<int>();
     permanent_reject.repetitions = node["plugin"]["permanent-reject"]["repetitions"].as<int>();
+}
+
+bool Config::operator==( const Config& operand2 ) const
+{
+    return mode == operand2.mode && model_file == operand2.model_file &&
+           blacklist == operand2.blacklist && whitelist == operand2.whitelist &&
+           timeframe == operand2.timeframe && hmm == operand2.hmm &&
+           entropy == operand2.entropy && length == operand2.length &&
+           short_reject == operand2.short_reject && long_reject == operand2.long_reject &&
+           permanent_reject == operand2.permanent_reject;
+}
+
+std::ostream& operator<<( std::ostream& os, const Config& options )
+{
+    os << "[DNS Firewall]  - mode: " << options.mode << std::endl;
+    os << "[DNS Firewall]  - model-file: " << options.model_file << std::endl;
+    os << "[DNS Firewall]  - blacklist file: " << options.blacklist << std::endl;
+    os << "[DNS Firewall]  - whitelist file: " << options.whitelist << std::endl;
+
+    os << "[DNS Firewall]  - Entropy classifier:" << std::endl;
+    os << options.entropy << std::endl;
+    os << "[DNS Firewall]  - HMM classifier:" << std::endl;
+    os << options.hmm << std::endl;
+    os << "[DNS Firewall]  - Timeframe classifier:" << std::endl;
+    os << options.timeframe << std::endl;
+
+    os << "[DNS Firewall]  - Short reject: " << std::endl;
+    os << options.short_reject << std::endl;
+    os << "[DNS Firewall]  - Long reject: " << std::endl;
+    os << options.long_reject << std::endl;
+    os << "[DNS Firewall]  - Permanent reject: " << std::endl;
+    os << options.permanent_reject;
+
+    return os;
 }
 
 }} // namespace snort::dns_firewall

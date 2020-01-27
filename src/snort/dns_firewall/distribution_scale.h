@@ -15,6 +15,8 @@
 #ifndef SNORT_DNS_FIREWALL_DISTRIBUTION_SCALE_H
 #define SNORT_DNS_FIREWALL_DISTRIBUTION_SCALE_H
 
+#include <ostream>
+
 namespace snort { namespace dns_firewall {
 
 enum DistributionScale
@@ -22,6 +24,8 @@ enum DistributionScale
     LINEAR,
     LOG
 };
+
+std::ostream& operator<<( std::ostream&, const DistributionScale& );
 
 }} // namespace snort::dns_firewall
 
