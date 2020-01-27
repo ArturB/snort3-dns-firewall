@@ -20,6 +20,7 @@ namespace snort { namespace dns_firewall {
 
 DnsClassifier::DnsClassifier( const Config& config )
     : options( config )
+    , timeframe_classifier( config )
 {
     Model model;
     model.load( options.model_file );
@@ -65,6 +66,15 @@ Classification DnsClassifier::classify_question( const std::string& domain )
     // Min length check
     if( domain.size() < options.length.min_length ) {
         return Classification( domain, Classification::Note::MIN_LENGTH, 0 );
+    }
+
+    // Timeframe check
+    if( timeframe_classifier.insert( domain ) ==
+        timeframe::DnsClassifier::Classification::INVALID ) {
+        return Classification( domain,
+                               Classification::Note::INVALID_TIMEFRAME,
+                               timeframe_classifier.get_current_queries(),
+                               options.timeframe.max_queries );
     }
 
     double entropy_score = 0;

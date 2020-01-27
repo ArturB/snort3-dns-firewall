@@ -48,10 +48,11 @@ snort::IpsOption::EvalStatus dns_firewall::IpsOption::eval( Cursor&, Packet* p )
     Classification cls = classifier.classify( dns );
     if( cls.note == Classification::Note::WHITELIST ||
         cls.note == Classification::Note::MIN_LENGTH ) {
-        std::cout << cls << " ACCEPT" << std::endl;
+        // std::cout << cls << " ACCEPT" << std::endl;
         return NO_MATCH;
     }
     if( cls.note == Classification::Note::BLACKLIST ||
+        cls.note == Classification::Note::INVALID_TIMEFRAME ||
         cls.score < options.short_reject.threshold ) {
         std::cout << cls << " REJECT" << std::endl;
         return MATCH;

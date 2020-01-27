@@ -16,8 +16,43 @@
 #define SNORT_DNS_FIREWALL_TIMEFRAME_DNS_CLASSIFIER_H
 
 #include <cmath>
+#include <config.h>
+#include <ctime>
+#include <queue>
+#include <string>
 
 namespace snort { namespace dns_firewall { namespace timeframe {
+
+class DnsClassifier
+{
+  public:
+    enum Classification
+    {
+        VALID,
+        INVALID
+    };
+    struct DomainTimestamp
+    {
+        std::string domain;
+        time_t unix_timestamp;
+        DomainTimestamp( const std::string& domain, time_t unix_timestamp )
+            : domain( domain )
+            , unix_timestamp( unix_timestamp )
+        {
+        }
+    };
+
+  private:
+    snort::dns_firewall::Config options;
+    std::queue<DomainTimestamp> timestamps;
+
+    void pop_old();
+
+  public:
+    explicit DnsClassifier( const snort::dns_firewall::Config& );
+    Classification insert( const std::string& );
+    unsigned get_current_queries() const;
+};
 
 }}} // namespace snort::dns_firewall::timeframe
 

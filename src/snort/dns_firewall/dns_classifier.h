@@ -20,6 +20,7 @@
 #include "dns_packet.h"
 #include "entropy/dns_classifier.h"
 #include "hmm/dns_classifier.h"
+#include "timeframe/dns_classifier.h"
 
 namespace snort { namespace dns_firewall {
 
@@ -31,6 +32,7 @@ class DnsClassifier
     std::vector<std::string> blacklist;
     std::vector<std::string> whitelist;
     std::vector<entropy::DnsClassifier> entropy_classifiers;
+    timeframe::DnsClassifier timeframe_classifier;
     Classification classify_question( const std::string& );
 
   public:

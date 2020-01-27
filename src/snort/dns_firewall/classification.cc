@@ -28,6 +28,18 @@ Classification::Classification( const std::string& domain,
     : domain( domain )
     , note( note )
     , score( score )
+    , score2( 0 )
+{
+}
+
+Classification::Classification( const std::string& domain,
+                                Classification::Note note,
+                                double score,
+                                double score2 )
+    : domain( domain )
+    , note( note )
+    , score( score )
+    , score2( score2 )
 {
 }
 
@@ -53,6 +65,10 @@ std::ostream& operator<<( std::ostream& os, const Classification& cls )
     }
     if( cls.note == Classification::Note::WHITELIST ) {
         os << "[DNS Firewall] " << cls.domain << " WHITELIST";
+    }
+    if( cls.note == Classification::Note::INVALID_TIMEFRAME ) {
+        os << "[DNS Firewall] " << cls.domain << " INVALID_TIMEFRAME " << cls.score << "/"
+           << cls.score2;
     }
     if( cls.note == Classification::Note::MIN_LENGTH ) {
         os << "[DNS Firewall] " << cls.domain << " TOO SHORT";

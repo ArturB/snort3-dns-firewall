@@ -13,7 +13,38 @@
 // **********************************************************************
 
 #include "dns_classifier.h"
+#include <ctime>
 
 namespace snort { namespace dns_firewall { namespace timeframe {
+
+DnsClassifier::DnsClassifier( const snort::dns_firewall::Config& options )
+    : options( options )
+{
+}
+
+void DnsClassifier::pop_old()
+{
+    std::time_t max_timestamp = std::time( 0 ) - options.timeframe.period;
+    while( timestamps.front().unix_timestamp < max_timestamp ) {
+        timestamps.pop();
+    }
+}
+
+unsigned DnsClassifier::get_current_queries() const
+{
+    return timestamps.size();
+}
+
+DnsClassifier::Classification DnsClassifier::insert( const std::string& domain )
+{
+    pop_old();
+    std::time_t current_timestamp = std::time( 0 );
+    timestamps.push( DnsClassifier::DomainTimestamp( domain, current_timestamp ) );
+    if( timestamps.size() <= options.timeframe.max_queries ) {
+        return Classification::VALID;
+    } else {
+        return Classification::INVALID;
+    }
+}
 
 }}} // namespace snort::dns_firewall::timeframe

@@ -15,8 +15,8 @@
 #ifndef SNORT_DNS_FIREWALL_CLASSIFICATION_H
 #define SNORT_DNS_FIREWALL_CLASSIFICATION_H
 
-#include <string>
 #include <ostream>
+#include <string>
 
 namespace snort { namespace dns_firewall {
 
@@ -25,6 +25,7 @@ struct Classification
     enum Note
     {
         BLACKLIST,
+        INVALID_TIMEFRAME,
         WHITELIST,
         MIN_LENGTH,
         SCORE
@@ -33,9 +34,11 @@ struct Classification
     std::string domain;
     Note note;
     double score;
+    double score2;
 
     Classification();
     Classification( const std::string&, Classification::Note, double );
+    Classification( const std::string&, Classification::Note, double, double );
     bool operator==( const Classification& ) const;
     bool operator<( const Classification& ) const;
     bool operator>( const Classification& ) const;
