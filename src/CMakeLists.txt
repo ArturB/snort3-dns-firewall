@@ -22,7 +22,9 @@ include_directories(
 
 add_library (
     dnsfirewall MODULE
+        snort/dns_firewall/classification.cc
         snort/dns_firewall/config.cc
+        snort/dns_firewall/dns_classifier.cc
         snort/dns_firewall/dns_packet.cc
         snort/dns_firewall/ips_option.cc
         snort/dns_firewall/model.cc
@@ -58,4 +60,3 @@ install (
     TARGETS snort3trainer
     RUNTIME DESTINATION "lib64/snort/${CMAKE_PROJECT_NAME}"
 )
-

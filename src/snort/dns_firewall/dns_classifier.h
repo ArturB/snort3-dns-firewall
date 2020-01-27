@@ -12,36 +12,48 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
-#ifndef SNORT_DNS_FIREWALL_OPTION_H
-#define SNORT_DNS_FIREWALL_OPTION_H
+#ifndef SNORT_DNS_FIREWALL_DNS_CLASSIFIER_H
+#define SNORT_DNS_FIREWALL_DNS_CLASSIFIER_H
 
+#include "classification.h"
 #include "config.h"
-#include "dns_classifier.h"
 #include "dns_packet.h"
 #include "entropy/dns_classifier.h"
-#include <framework/ips_option.h>
+#include "hmm/dns_classifier.h"
+#include <algorithm>
+#include <armadillo>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
+#include <getopt.h>
 #include <iostream>
+#include <limits>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <string>
+#include <unistd.h>
+#include <unordered_map>
 #include <vector>
 
 namespace snort { namespace dns_firewall {
 
-static const char* module_name = "dns_firewall";
-static const char* module_help = "alert on suspicious DNS queries activity";
-
-class IpsOption : public snort::IpsOption
+class DnsClassifier
 {
+  public:
   private:
     Config options;
-    DnsClassifier classifier;
+    std::vector<std::string> blacklist;
+    std::vector<std::string> whitelist;
+    std::vector<entropy::DnsClassifier> entropy_classifiers;
+    Classification classify_question( const std::string& );
 
   public:
-    explicit IpsOption( const std::string& );
-    bool operator==( const IpsOption& ) const;
-
-    uint32_t hash() const override;
-    EvalStatus eval( Cursor&, Packet* ) override;
+    explicit DnsClassifier( const Config& );
+    Classification classify( const DnsPacket& );
 };
 
 }} // namespace snort::dns_firewall
 
-#endif // SNORT_DNS_FIREWALL_IPS_OPTION_H
+#endif // SNORT_DNS_FIREWALL_DNS_CLASSIFIER_H

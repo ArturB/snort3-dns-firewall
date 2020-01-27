@@ -1,26 +1,26 @@
 plugin:
     mode: simple
     model-file: /etc/snort/dns-firewall/basic.snort3model
-    whitelist: ""
-    blacklist: ""
+    whitelist:  /etc/snort/dns-firewall/whitelist.snort3model
+    blacklist:  /etc/snort/dns-firewall/blacklist.snort3model
     length:
         min-length: 8
-        max-length: 50
-        max-length-penalty: 1
+        max-length: 40
+        max-length-penalty: 0.1
     hmm:
         weight: 10
     entropy:
         weight: 10
     short-reject:
         block-period: 5
-        threshold: -4
+        threshold: -2
         repetitions: 1
     long-reject:
         block-period: 60
-        threshold: -5
+        threshold: -3
         repetitions: 5
     permanent-reject:
-        threshold: -6
+        threshold: -4
         repetitions: 10
 
 trainer:

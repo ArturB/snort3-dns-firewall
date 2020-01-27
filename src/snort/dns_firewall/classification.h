@@ -12,36 +12,34 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
-#ifndef SNORT_DNS_FIREWALL_OPTION_H
-#define SNORT_DNS_FIREWALL_OPTION_H
+#ifndef SNORT_DNS_FIREWALL_CLASSIFICATION_H
+#define SNORT_DNS_FIREWALL_CLASSIFICATION_H
 
-#include "config.h"
-#include "dns_classifier.h"
-#include "dns_packet.h"
-#include "entropy/dns_classifier.h"
-#include <framework/ips_option.h>
-#include <iostream>
-#include <vector>
+#include <string>
 
 namespace snort { namespace dns_firewall {
 
-static const char* module_name = "dns_firewall";
-static const char* module_help = "alert on suspicious DNS queries activity";
-
-class IpsOption : public snort::IpsOption
+struct Classification
 {
-  private:
-    Config options;
-    DnsClassifier classifier;
+    enum Note
+    {
+        BLACKLIST,
+        WHITELIST,
+        MIN_LENGTH,
+        SCORE
+    };
 
-  public:
-    explicit IpsOption( const std::string& );
-    bool operator==( const IpsOption& ) const;
+    std::string domain;
+    Note note;
+    double score;
 
-    uint32_t hash() const override;
-    EvalStatus eval( Cursor&, Packet* ) override;
+    Classification();
+    Classification( const std::string&, Classification::Note, double );
+    bool operator==( const Classification& ) const;
+    bool operator<( const Classification& ) const;
+    bool operator>( const Classification& ) const;
 };
 
 }} // namespace snort::dns_firewall
 
-#endif // SNORT_DNS_FIREWALL_IPS_OPTION_H
+#endif // SNORT_DNS_FIREWALL_CLASSIFICATION_H

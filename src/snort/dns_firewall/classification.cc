@@ -12,36 +12,39 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
-#ifndef SNORT_DNS_FIREWALL_OPTION_H
-#define SNORT_DNS_FIREWALL_OPTION_H
-
-#include "config.h"
-#include "dns_classifier.h"
-#include "dns_packet.h"
-#include "entropy/dns_classifier.h"
-#include <framework/ips_option.h>
-#include <iostream>
-#include <vector>
+#include "classification.h"
+#include <string>
 
 namespace snort { namespace dns_firewall {
 
-static const char* module_name = "dns_firewall";
-static const char* module_help = "alert on suspicious DNS queries activity";
-
-class IpsOption : public snort::IpsOption
+Classification::Classification()
+    : note( Note::SCORE )
+    , score( 0 )
 {
-  private:
-    Config options;
-    DnsClassifier classifier;
+}
 
-  public:
-    explicit IpsOption( const std::string& );
-    bool operator==( const IpsOption& ) const;
+Classification::Classification( const std::string& domain,
+                                Classification::Note note,
+                                double score )
+    : domain( domain )
+    , note( note )
+    , score( score )
+{
+}
 
-    uint32_t hash() const override;
-    EvalStatus eval( Cursor&, Packet* ) override;
-};
+bool Classification::operator==( const Classification& operand2 ) const
+{
+    return note == operand2.note && score == operand2.score;
+}
+
+bool Classification::operator<( const Classification& operand2 ) const
+{
+    return note < operand2.note || score < operand2.score;
+}
+
+bool Classification::operator>( const Classification& operand2 ) const
+{
+    return note > operand2.note || score > operand2.score;
+}
 
 }} // namespace snort::dns_firewall
-
-#endif // SNORT_DNS_FIREWALL_IPS_OPTION_H
