@@ -17,16 +17,10 @@
 
 #include "config.h"
 #include "dns_classifier.h"
-#include "dns_packet.h"
-#include "entropy/dns_classifier.h"
 #include <framework/ips_option.h>
-#include <iostream>
-#include <vector>
+#include <protocols/packet.h>
 
 namespace snort { namespace dns_firewall {
-
-static const char* module_name = "dns_firewall";
-static const char* module_help = "alert on suspicious DNS queries activity";
 
 class IpsOption : public snort::IpsOption
 {

@@ -13,7 +13,6 @@
 // **********************************************************************
 
 #include "classification.h"
-#include <string>
 
 namespace snort { namespace dns_firewall {
 

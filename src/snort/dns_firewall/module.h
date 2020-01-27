@@ -15,14 +15,13 @@
 #ifndef SNORT_DNS_FIREWALL_MODULE_H
 #define SNORT_DNS_FIREWALL_MODULE_H
 
-#include "config.h"
-#include "ips_option.h"
 #include <framework/module.h>
-#include <iostream>
 #include <profiler/profiler.h>
 
 namespace snort { namespace dns_firewall {
 
+static const char* module_name = "dns_firewall";
+static const char* module_help = "alert on suspicious DNS queries activity";
 static THREAD_LOCAL ProfileStats dns_tunnel_perf_stats;
 
 class Module : public snort::Module

@@ -50,7 +50,7 @@ endif ( ENABLE_DEBUG )
 
 if ( ENABLE_RELEASE )
     set( CMAKE_BUILD_TYPE "RELEASE" )
-    string ( APPEND CMAKE_CXX_FLAGS "-O3 " )
+    string ( APPEND CMAKE_CXX_FLAGS "-O2 " )
 endif ( ENABLE_RELEASE )
 
 # Process src dir

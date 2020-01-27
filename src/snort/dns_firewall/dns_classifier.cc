@@ -13,12 +13,7 @@
 // **********************************************************************
 
 #include "dns_classifier.h"
-#include "classification.h"
-#include "config.h"
-#include "dns_packet.h"
-#include "entropy/dns_classifier.h"
 #include "model.h"
-#include <limits>
 #include <regex>
 
 namespace snort { namespace dns_firewall {

@@ -15,9 +15,6 @@
 #ifndef SNORT_DNS_FIREWALL_DISTRIBUTION_SCALE_H
 #define SNORT_DNS_FIREWALL_DISTRIBUTION_SCALE_H
 
-#include <string>
-#include <vector>
-
 namespace snort { namespace dns_firewall {
 
 enum DistributionScale

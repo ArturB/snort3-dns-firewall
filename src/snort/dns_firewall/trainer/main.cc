@@ -16,22 +16,6 @@
 #include "hmm/dns_classifier.h"
 #include "model.h"
 #include "trainer/config.h"
-#include <algorithm>
-#include <cmath>
-#include <cstdio>
-#include <cstdlib>
-#include <fstream>
-#include <getopt.h>
-#include <iostream>
-#include <locale>
-#include <queue>
-#include <set>
-#include <sstream>
-#include <string>
-#include <unistd.h>
-#include <unordered_map>
-#include <vector>
-#include <yaml-cpp/yaml.h>
 
 extern char* optarg;
 

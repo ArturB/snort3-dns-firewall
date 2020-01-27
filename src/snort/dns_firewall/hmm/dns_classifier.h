@@ -12,22 +12,14 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
-#include <algorithm>
+#ifndef SNORT_DNS_FIREWALL_TRAINER_HMM_DNS_CLASSIFIER_H
+#define SNORT_DNS_FIREWALL_TRAINER_HMM_DNS_CLASSIFIER_H
+
 #include <armadillo>
 #include <cmath>
-#include <cstdio>
-#include <cstdlib>
-#include <fstream>
-#include <getopt.h>
-#include <iostream>
-#include <queue>
-#include <set>
-#include <sstream>
-#include <string>
-#include <unistd.h>
-#include <unordered_map>
-#include <vector>
 
 namespace snort { namespace dns_firewall { namespace hmm {
 
 }}} // namespace snort::dns_firewall::hmm
+
+#endif // SNORT_DNS_FIREWALL_TRAINER_HMM_DNS_CLASSIFIER_H

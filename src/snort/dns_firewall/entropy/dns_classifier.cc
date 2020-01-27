@@ -13,7 +13,7 @@
 // **********************************************************************
 
 #include "dns_classifier.h"
-#include "distribution_scale.h"
+#include <cmath>
 
 namespace snort { namespace dns_firewall { namespace entropy {
 

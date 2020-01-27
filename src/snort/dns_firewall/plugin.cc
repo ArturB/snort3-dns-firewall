@@ -14,7 +14,6 @@
 
 #include "ips_option.h"
 #include "module.h"
-#include <protocols/packet.h>
 
 using namespace snort;
 

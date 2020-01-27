@@ -20,22 +20,6 @@
 #include "dns_packet.h"
 #include "entropy/dns_classifier.h"
 #include "hmm/dns_classifier.h"
-#include <algorithm>
-#include <armadillo>
-#include <cmath>
-#include <cstdio>
-#include <cstdlib>
-#include <fstream>
-#include <getopt.h>
-#include <iostream>
-#include <limits>
-#include <queue>
-#include <set>
-#include <sstream>
-#include <string>
-#include <unistd.h>
-#include <unordered_map>
-#include <vector>
 
 namespace snort { namespace dns_firewall {
 

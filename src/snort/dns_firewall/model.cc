@@ -18,7 +18,6 @@
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/vector.hpp>
 #include <fstream>
-#include <unordered_map>
 
 namespace snort { namespace dns_firewall {
 

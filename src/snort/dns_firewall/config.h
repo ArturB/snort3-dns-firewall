@@ -16,7 +16,6 @@
 #define SNORT_DNS_FIREWALL_CONFIG_H
 
 #include <string>
-#include <vector>
 
 namespace snort { namespace dns_firewall {
 

@@ -12,24 +12,12 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
-#ifndef SNORT_DNS_FIREWALL_TRAINER_ENTROPY_LINE_PROCESSOR_H
-#define SNORT_DNS_FIREWALL_TRAINER_ENTROPY_LINE_PROCESSOR_H
+#ifndef SNORT_DNS_FIREWALL_TRAINER_ENTROPY_DNS_CLASSIFIER_H
+#define SNORT_DNS_FIREWALL_TRAINER_ENTROPY_DNS_CLASSIFIER_H
 
 #include "distribution_scale.h"
-#include <algorithm>
-#include <cmath>
-#include <cstdio>
-#include <cstdlib>
-#include <fstream>
-#include <getopt.h>
-#include <iostream>
 #include <queue>
-#include <set>
-#include <sstream>
-#include <string>
-#include <unistd.h>
 #include <unordered_map>
-#include <vector>
 
 namespace snort { namespace dns_firewall { namespace entropy {
 
@@ -100,4 +88,4 @@ class DnsClassifier
 
 }}} // namespace snort::dns_firewall::entropy
 
-#endif // SNORT_DNS_FIREWALL_TRAINER_ENTROPY_LINE_PROCESSOR_H
+#endif // SNORT_DNS_FIREWALL_TRAINER_ENTROPY_DNS_CLASSIFIER_H

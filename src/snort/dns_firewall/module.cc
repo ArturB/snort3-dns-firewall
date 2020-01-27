@@ -15,9 +15,6 @@
 #include "module.h"
 #include "config.h"
 #include "ips_option.h"
-#include <fstream>
-#include <profiler/profiler.h>
-#include <unistd.h>
 
 namespace snort { namespace dns_firewall {
 

@@ -13,7 +13,6 @@
 // **********************************************************************
 
 #include "dns_packet.h"
-#include <cstring>
 
 namespace snort { namespace dns_firewall {
 
