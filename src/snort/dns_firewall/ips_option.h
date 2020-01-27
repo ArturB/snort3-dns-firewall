@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
-#ifndef SNORT_DNS_FIREWALL_OPTION_H
-#define SNORT_DNS_FIREWALL_OPTION_H
+#ifndef SNORT_DNS_FIREWALL_IPS_OPTION_H
+#define SNORT_DNS_FIREWALL_IPS_OPTION_H
 
 #include "config.h"
 #include "dns_classifier.h"

@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
-#ifndef SNORT_DNS_FIREWALL_DNS_CODEC_H
-#define SNORT_DNS_FIREWALL_DNS_CODEC_H
+#ifndef SNORT_DNS_FIREWALL_DNS_PACKET_H
+#define SNORT_DNS_FIREWALL_DNS_PACKET_H
 
 #include <string>
 #include <vector>
@@ -50,4 +50,4 @@ struct DnsPacket
 
 }} // namespace snort::dns_firewall
 
-#endif // SNORT_DNS_FIREWALL_DNS_CODEC_H
+#endif // SNORT_DNS_FIREWALL_DNS_PACKET_H

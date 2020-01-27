@@ -12,25 +12,8 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
-#ifndef SNORT_DNS_FIREWALL_MODEL_H
-#define SNORT_DNS_FIREWALL_MODEL_H
+#include "dns_classifier.h"
 
-#include <unordered_map>
-#include <vector>
+namespace snort { namespace dns_firewall { namespace timeframe {
 
-namespace snort { namespace dns_firewall {
-
-struct Model
-{
-    unsigned bins;
-    std::unordered_map<unsigned, std::vector<double>> entropy_distribution;
-
-    Model();
-    void save( std::string filename );
-    void load( std::string filename );
-    void save_graphs( const std::string&, const std::string& = ".csv" );
-};
-
-}} // namespace snort::dns_firewall
-
-#endif // SNORT_DNS_FIREWALL_MODEL_H
+}}} // namespace snort::dns_firewall::timeframe

@@ -1,8 +1,11 @@
 plugin:
     mode: simple
-    model-file: /etc/snort/dns-firewall/basic.snort3model
-    whitelist:  /etc/snort/dns-firewall/whitelist.snort3model
-    blacklist:  /etc/snort/dns-firewall/blacklist.snort3model
+    model-file: /etc/snort/dns-firewall/basic.dfw3model
+    whitelist:  /etc/snort/dns-firewall/whitelist.txt
+    blacklist:  /etc/snort/dns-firewall/blacklist.txt
+    timeframe:
+        period: 600
+        max-queries: 600
     length:
         min-length: 8
         max-length: 40
@@ -25,7 +28,7 @@ plugin:
 
 trainer:
     dataset: data/rb-domains.log
-    model-file: bin/model.snort3model
+    model-file: bin/basic.dfw3model
     max-lines: -1
     hmm:
         hidden-states: 10

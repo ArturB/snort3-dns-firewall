@@ -12,8 +12,8 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
-#ifndef SNORT_DNS_FIREWALL_TRAINER_ENTROPY_DNS_CLASSIFIER_H
-#define SNORT_DNS_FIREWALL_TRAINER_ENTROPY_DNS_CLASSIFIER_H
+#ifndef SNORT_DNS_FIREWALL_ENTROPY_DNS_CLASSIFIER_H
+#define SNORT_DNS_FIREWAL_ENTROPY_DNS_CLASSIFIER_H
 
 #include "distribution_scale.h"
 #include <queue>
@@ -88,4 +88,4 @@ class DnsClassifier
 
 }}} // namespace snort::dns_firewall::entropy
 
-#endif // SNORT_DNS_FIREWALL_TRAINER_ENTROPY_DNS_CLASSIFIER_H
+#endif // SNORT_DNS_FIREWALL_ENTROPY_DNS_CLASSIFIER_H

@@ -20,8 +20,11 @@ include_directories(
     snort/dns_firewall
 )
 
+set(LIBRARY_NAME "snort3dfw")
+set(TRAINER_NAME "dfw3trainer")
+
 add_library (
-    dnsfirewall MODULE
+    ${LIBRARY_NAME} MODULE
         snort/dns_firewall/classification.cc
         snort/dns_firewall/config.cc
         snort/dns_firewall/dns_classifier.cc
@@ -32,19 +35,20 @@ add_library (
         snort/dns_firewall/plugin.cc
         snort/dns_firewall/entropy/dns_classifier.cc
         snort/dns_firewall/hmm/dns_classifier.cc
+        snort/dns_firewall/timeframe/dns_classifier.cc
 )
 target_link_libraries(
-    dnsfirewall
+    ${LIBRARY_NAME}
     armadillo
     yaml-cpp
 )
 install (
-    TARGETS dnsfirewall
+    TARGETS ${LIBRARY_NAME}
     LIBRARY DESTINATION "lib64/snort/${CMAKE_PROJECT_NAME}"
 )
 
 add_executable(
-    snort3trainer
+    ${TRAINER_NAME}
         snort/dns_firewall/model.cc
         snort/dns_firewall/entropy/dns_classifier.cc
         snort/dns_firewall/hmm/dns_classifier.cc
@@ -52,11 +56,11 @@ add_executable(
         snort/dns_firewall/trainer/main.cc
 )
 target_link_libraries(
-    snort3trainer
+    ${TRAINER_NAME}
     armadillo
     yaml-cpp
 )
 install (
-    TARGETS snort3trainer
+    TARGETS ${TRAINER_NAME}
     RUNTIME DESTINATION "lib64/snort/${CMAKE_PROJECT_NAME}"
 )
