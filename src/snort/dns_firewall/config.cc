@@ -19,11 +19,32 @@ namespace snort { namespace dns_firewall {
 
 std::ostream& operator<<( std::ostream& os, const Config::Mode& mode )
 {
-    if( mode == Config::Mode::SIMPLE ) {
+    switch( mode ) {
+    case Config::Mode::SIMPLE:
         os << "simple";
-    }
-    if( mode == Config::Mode::LEARN ) {
+        break;
+    case Config::Mode::LEARN:
         os << "learn";
+        break;
+    }
+    return os;
+}
+
+std::ostream& operator<<( std::ostream& os, const Config::Verbosity& verbosity )
+{
+    switch( verbosity ) {
+    case Config::Verbosity::ALL:
+        os << "all";
+        break;
+    case Config::Verbosity::ALLOW_ONLY:
+        os << "allow only";
+        break;
+    case Config::Verbosity::REJECT_ONLY:
+        os << "reject only";
+        break;
+    case Config::Verbosity::NONE:
+        os << "none";
+        break;
     }
     return os;
 }
@@ -112,6 +133,19 @@ Config::Config( const std::string& config_filename )
         mode = Config::Mode::LEARN;
     }
 
+    if( node["plugin"]["verbosity"].as<std::string>() == "all" ) {
+        verbosity = Config::Verbosity::ALL;
+    }
+    if( node["plugin"]["verbosity"].as<std::string>() == "allow-only" ) {
+        verbosity = Config::Verbosity::ALLOW_ONLY;
+    }
+    if( node["plugin"]["verbosity"].as<std::string>() == "reject-only" ) {
+        verbosity = Config::Verbosity::REJECT_ONLY;
+    }
+    if( node["plugin"]["verbosity"].as<std::string>() == "none" ) {
+        verbosity = Config::Verbosity::NONE;
+    }
+
     model.filename = node["plugin"]["model"]["file"].as<std::string>();
     model.weight   = node["plugin"]["model"]["weight"].as<int>();
 
@@ -153,6 +187,7 @@ bool Config::operator==( const Config& operand2 ) const
 std::ostream& operator<<( std::ostream& os, const Config& options )
 {
     os << "[DNS Firewall]  - mode: " << options.mode << std::endl;
+    os << "[DNS Firewall]  - verbosity: " << options.verbosity << std::endl;
     os << "[DNS Firewall]  - Model: " << std::endl;
     os << options.model << std::endl;
     os << "[DNS Firewall]  - blacklist file: " << options.blacklist << std::endl;

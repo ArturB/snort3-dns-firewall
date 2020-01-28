@@ -27,6 +27,13 @@ struct Config
         SIMPLE,
         LEARN
     };
+    enum Verbosity
+    {
+        ALL,
+        ALLOW_ONLY,
+        REJECT_ONLY,
+        NONE
+    };
     struct ModelConfig
     {
         std::string filename;
@@ -71,6 +78,7 @@ struct Config
     };
 
     Mode mode;
+    Verbosity verbosity;
     ModelConfig model;
     std::string blacklist;
     std::string whitelist;
@@ -88,6 +96,7 @@ struct Config
 };
 
 std::ostream& operator<<( std::ostream&, const Config::Mode& );
+std::ostream& operator<<( std::ostream&, const Config::Verbosity& );
 
 }} // namespace snort::dns_firewall
 

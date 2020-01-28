@@ -62,18 +62,33 @@ snort::IpsOption::EvalStatus dns_firewall::IpsOption::eval( Cursor&, Packet* p )
 
     // Simple mode
     Classification cls = classifier.classify( dns );
+
+    // Allow query
     if( cls.note == Classification::Note::WHITELIST ||
-        cls.note == Classification::Note::MIN_LENGTH ) {
+        cls.note == Classification::Note::MIN_LENGTH ||
+        ( cls.note == Classification::Note::SCORE &&
+          cls.score >= options.short_reject.threshold ) ) {
+        // If verbosity level requires, print to stdout
+        if( options.verbosity == Config::Verbosity::ALL ||
+            options.verbosity == Config::Verbosity::ALLOW_ONLY ) {
+            std::cout << cls << " ALLOW" << std::endl;
+        }
         return NO_MATCH;
     }
+    // Reject query
     if( cls.note == Classification::Note::BLACKLIST ||
         cls.note == Classification::Note::INVALID_TIMEFRAME ||
         ( cls.note == Classification::Note::SCORE &&
           cls.score < options.short_reject.threshold ) ) {
-        std::cout << cls << " REJECT" << std::endl;
+        // If verbosity level requires, print to stdout
+        if( options.verbosity == Config::Verbosity::ALL ||
+            options.verbosity == Config::Verbosity::REJECT_ONLY ) {
+            std::cout << cls << " REJECT" << std::endl;
+        }
         return MATCH;
     }
-    return NO_MATCH; // should never execute
+
+    return NO_MATCH; // this line should never execute
 }
 
 }} // namespace snort::dns_firewall
