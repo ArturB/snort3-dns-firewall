@@ -61,10 +61,10 @@ double DnsClassifier::domain_metric( unsigned domain_val ) const noexcept
 // Calculate given metric for dns_fifo
 double DnsClassifier::fifo_metric() const noexcept
 {
-    double metric_value =
-      std::accumulate( freq_.begin(), freq_.end(), 0, [this]( auto acc, auto f2 ) {
-          return acc + domain_metric( f2.second );
-      } );
+    double metric_value = 0;
+    for( auto& f: freq_ ) {
+        metric_value += domain_metric( f.second );
+    }
     return metric_value / log( dns_fifo_.size() );
 }
 
@@ -137,8 +137,10 @@ DnsClassifier::get_entropy_distribution( snort::dns_firewall::DistributionScale 
 {
     std::vector<double> distribution_values = std::vector<double>( dist_bins_, 0 );
 
-    unsigned observations_count =
-      std::accumulate( entropy_distribution_.begin(), entropy_distribution_.end(), 0 );
+    unsigned observations_count = 0;
+    for( auto& d: entropy_distribution_ ) {
+        observations_count += d;
+    }
 
     if( scale == snort::dns_firewall::DistributionScale::LOG ) {
         std::transform( entropy_distribution_.begin(),
@@ -196,12 +198,6 @@ void DnsClassifier::learn( const std::string& domain ) noexcept
 {
     if( state_shift_ ) {
         forward_shift( get_dns_xld( domain, 2 ) );
-
-        // std::cout << "Fifo, state_shift = " << state_shift_
-        //           << ",dns_fifo_.size() = " << dns_fifo_.size() << " metric " <<
-        //           current_metric_
-        //           << std::endl;
-
         unsigned distribution_bin = floor( current_metric_ * dist_bins_ );
         ++entropy_distribution_[distribution_bin];
     } else {
@@ -225,8 +221,12 @@ double DnsClassifier::classify( const std::string& domain ) noexcept
 
     forward_shift( fld );
     unsigned distribution_bin = floor( current_metric_ * dist_bins_ );
-    unsigned observations_count =
-      std::accumulate( entropy_distribution_.begin(), entropy_distribution_.end(), 0 );
+
+    unsigned observations_count = 0;
+    for( auto& d: entropy_distribution_ ) {
+        observations_count += d;
+    }
+
     double metric_probability =
       double( entropy_distribution_[distribution_bin] ) / double( observations_count );
     double domain_freq = double( freq_[fld] ) / double( dns_fifo_size_ );

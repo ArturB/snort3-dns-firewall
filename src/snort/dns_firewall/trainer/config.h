@@ -23,6 +23,20 @@ namespace snort { namespace dns_firewall { namespace trainer {
 
 struct Config
 {
+    struct DatasetConfig
+    {
+        std::string filename;
+        int max_lines;
+        bool operator==( const DatasetConfig& ) const;
+        friend std::ostream& operator<<( std::ostream&, const DatasetConfig& );
+    };
+    struct MaxLengthConfig
+    {
+        double percentile;
+        double penalty;
+        bool operator==( const MaxLengthConfig& ) const;
+        friend std::ostream& operator<<( std::ostream&, const MaxLengthConfig& );
+    };
     struct HmmConfig
     {
         unsigned hidden_states;
@@ -38,9 +52,9 @@ struct Config
         friend std::ostream& operator<<( std::ostream&, const EntropyConfig& );
     };
 
-    std::string dataset;
+    DatasetConfig dataset;
     std::string model_file;
-    int max_lines;
+    MaxLengthConfig max_length;
     HmmConfig hmm;
     EntropyConfig entropy;
 

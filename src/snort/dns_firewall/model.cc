@@ -22,7 +22,9 @@
 namespace snort { namespace dns_firewall {
 
 Model::Model()
-    : bins( 0 )
+    : query_max_length( 0 )
+    , max_length_penalty( 0 )
+    , bins( 0 )
 {
 }
 
@@ -30,7 +32,7 @@ void Model::save( std::string filename )
 {
     std::ofstream fs( filename );
     cereal::BinaryOutputArchive oarchive( fs );
-    oarchive( bins, entropy_distribution );
+    oarchive( query_max_length, max_length_penalty, bins, entropy_distribution );
     fs.close();
 }
 
@@ -38,7 +40,7 @@ void Model::load( std::string filename )
 {
     std::ifstream fs( filename );
     cereal::BinaryInputArchive iarchive( fs );
-    iarchive( bins, entropy_distribution );
+    iarchive( query_max_length, max_length_penalty, bins, entropy_distribution );
     fs.close();
 }
 
@@ -52,6 +54,18 @@ void Model::save_graphs( const std::string& filename_prefix,
         }
         fs.close();
     }
+}
+
+std::ostream& operator<<( std::ostream& os, const Model& model )
+{
+    os << "[DNS Firewall]  - Entropy window widths: ";
+    for( auto& d: model.entropy_distribution ) {
+        os << d.first << " ";
+    }
+    os << std::endl;
+    os << "[DNS Firewall]  - Max queries length: " << model.query_max_length << std::endl;
+    os << "[DNS Firewall]  - Max-length penalty: " << model.max_length_penalty;
+    return os;
 }
 
 }} // namespace snort::dns_firewall

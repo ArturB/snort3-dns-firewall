@@ -31,10 +31,13 @@ class DnsClassifier
   public:
   private:
     Config options;
+    unsigned query_max_length;
+    double max_length_penalty;
     std::vector<std::string> blacklist;
     std::vector<std::string> whitelist;
-    std::vector<entropy::DnsClassifier> entropy_classifiers;
     timeframe::DnsClassifier timeframe_classifier;
+    std::vector<entropy::DnsClassifier> entropy_classifiers;
+
     Classification classify_question( const std::string& );
 
   public:

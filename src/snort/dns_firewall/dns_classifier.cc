@@ -22,24 +22,36 @@ namespace snort { namespace dns_firewall {
 
 DnsClassifier::DnsClassifier( const Config& config )
     : options( config )
+    , query_max_length( 256 )
+    , max_length_penalty( 0 )
     , timeframe_classifier( config )
 {
     Model model;
     model.load( options.model.filename );
 
-    // Initialize blacklist
-    std::ifstream blacklist_file( options.blacklist );
-    std::string line;
-    while( std::getline( blacklist_file, line ) ) {
-        blacklist.push_back( line );
+    query_max_length   = model.query_max_length;
+    max_length_penalty = model.max_length_penalty;
+
+    // Initialize blacklist, if applicable
+    if( not options.blacklist.empty() ) {
+        std::ifstream blacklist_file( options.blacklist );
+        std::string line;
+        while( std::getline( blacklist_file, line ) ) {
+            blacklist.push_back( line );
+        }
+        blacklist_file.close();
     }
-    blacklist_file.close();
-    // Initialize whitelist
-    std::ifstream whitelist_file( options.whitelist );
-    while( getline( whitelist_file, line ) ) {
-        whitelist.push_back( line );
+
+    // Initialize whitelist, if applicable
+    if( not options.whitelist.empty() ) {
+        std::ifstream whitelist_file( options.whitelist );
+        std::string line;
+        while( getline( whitelist_file, line ) ) {
+            whitelist.push_back( line );
+        }
+        whitelist_file.close();
     }
-    whitelist_file.close();
+
     // Initialize entropy clasifiers
     for( auto& d: model.entropy_distribution ) {
         entropy_classifiers.push_back( entropy::DnsClassifier( d.first, d.second.size() ) );
@@ -50,26 +62,27 @@ DnsClassifier::DnsClassifier( const Config& config )
 
 Classification DnsClassifier::classify_question( const std::string& domain )
 {
+    // ****************
     // Blacklist check
+    // ****************
     if( std::any_of( blacklist.begin(), blacklist.end(), [&]( auto blacklisted ) {
             return std::regex_match( domain, std::regex( ".*" + blacklisted ) );
         } ) ) {
-        return Classification( domain, Classification::Note::WHITELIST, 0 );
+        return Classification( domain, Classification::Note::BLACKLIST, 0 );
     }
 
+    // ****************
     // Whitelist check
+    // ****************
     if( std::any_of( whitelist.begin(), whitelist.end(), [&]( auto whitelisted ) {
             return std::regex_match( domain, std::regex( ".*" + whitelisted ) );
         } ) ) {
         return Classification( domain, Classification::Note::WHITELIST, 0 );
     }
 
-    // Min length check
-    if( domain.size() < options.length.min_length ) {
-        return Classification( domain, Classification::Note::MIN_LENGTH, 0 );
-    }
-
+    // ****************
     // Timeframe check
+    // ****************
     if( timeframe_classifier.insert( domain ) ==
         timeframe::DnsClassifier::Classification::INVALID ) {
         return Classification( domain,
@@ -78,20 +91,38 @@ Classification DnsClassifier::classify_question( const std::string& domain )
                                options.timeframe.max_queries );
     }
 
+    // ****************
+    // HMM CLASSIFIER
+    // ****************
+    double hmm_score = 0;
+
+    // *******************
+    // ENTROPY CLASSIFIER
+    // *******************
     double entropy_score = 0;
-    // Entropy score
-    for( auto& c: entropy_classifiers ) {
-        entropy_score += c.classify( domain );
-    }
-    entropy_score /= entropy_classifiers.size();
-
-    // Max length penalty
-    if( domain.size() > options.length.max_length ) {
-        entropy_score -=
-          ( domain.size() - options.length.max_length ) * options.length.max_length_penalty;
+    if( domain.size() >= options.entropy.min_length ) { // Min length check
+        // Average score from each entropy classifier
+        for( auto& c: entropy_classifiers ) {
+            entropy_score += c.classify( domain );
+        }
+        entropy_score /= entropy_classifiers.size();
     }
 
-    return Classification( domain, Classification::Note::SCORE, entropy_score );
+    // *******************
+    // TOTAL SCORE
+    // *******************
+    double score =
+      ( options.hmm.weight * hmm_score ) + ( options.entropy.weight * entropy_score ) /
+                                             ( options.hmm.weight + options.entropy.weight );
+
+    // *******************
+    // MAX LENGTH PENALTY
+    // *******************
+    if( domain.size() > query_max_length ) {
+        score -= ( domain.size() - query_max_length ) * max_length_penalty;
+    }
+
+    return Classification( domain, Classification::Note::SCORE, score );
 }
 
 Classification DnsClassifier::classify( const DnsPacket& dns )
@@ -110,7 +141,6 @@ void DnsClassifier::learn( const DnsPacket& dns )
 {
     for( auto& q: dns.questions ) {
         for( auto& c: entropy_classifiers ) {
-            std::cout << "Learn " << c.get_window_width() << std::endl;
             c.learn( q.qname );
         }
     }

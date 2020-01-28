@@ -9,13 +9,11 @@ plugin:
     timeframe:
         period: 600
         max-queries: 600
-    length:
-        min-length: 8
-        max-length: 40
-        max-length-penalty: 0.1
     hmm:
+        min-length: 8
         weight: 10
     entropy:
+        min-length: 0
         weight: 10
     short-reject:
         block-period: 5
@@ -30,9 +28,13 @@ plugin:
         repetitions: 10
 
 trainer:
-    dataset: data/rb-domains.log
+    dataset:
+        filename: data/rb-domains.log
+        max-lines: -1
     model-file: bin/basic.dfw3model
-    max-lines: -1
+    max-length:
+        percentile: 0.99
+        penalty: 0.1
     hmm:
         hidden-states: 10
     entropy:

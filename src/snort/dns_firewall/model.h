@@ -22,6 +22,8 @@ namespace snort { namespace dns_firewall {
 
 struct Model
 {
+    unsigned query_max_length;
+    double max_length_penalty;
     unsigned bins;
     std::unordered_map<unsigned, std::vector<double>> entropy_distribution;
 
@@ -29,6 +31,8 @@ struct Model
     void save( std::string filename );
     void load( std::string filename );
     void save_graphs( const std::string&, const std::string& = ".csv" );
+
+    friend std::ostream& operator<<( std::ostream&, const Model& );
 };
 
 }} // namespace snort::dns_firewall

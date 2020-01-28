@@ -78,13 +78,14 @@ int main( int argc, char* const argv[] )
     std::cout << "Config file: " << yaml_filename_getopt << std::endl;
     trainer::Config options = trainer::Config( yaml_filename_getopt );
     if( dataset_filename_getopt != "" ) {
-        options.dataset = dataset_filename_getopt;
+        options.dataset.filename  = dataset_filename_getopt;
+        options.dataset.max_lines = -1;
+    }
+    if( max_lines_getopt != -1 ) {
+        options.dataset.max_lines = max_lines_getopt;
     }
     if( model_filename_getopt != "" ) {
         options.model_file = model_filename_getopt;
-    }
-    if( max_lines_getopt != -1 ) {
-        options.max_lines = max_lines_getopt;
     }
     // Load and print trainer options
     std::cout << options << std::endl << std::endl;
@@ -94,21 +95,26 @@ int main( int argc, char* const argv[] )
     for( auto& w: options.entropy.window_widths ) {
         fifos.push_back( entropy::DnsClassifier( w, options.entropy.bins ) );
     }
+    // Collect domain length stats
+    std::unordered_map<unsigned, unsigned> domain_lengths;
+
     // Process data line by line
-    std::ifstream dataset_file( options.dataset );
+    std::ifstream dataset_file( options.dataset.filename );
     std::string line;
     unsigned processed_lines = 0;
-
     std::cout.imbue( std::locale( "" ) );
-    std::vector<std::string> line_buf;
+    std::vector<std::string> line_buf; // Thread lines buffer
+
     while( getline( dataset_file, line ) ) {
         if( line.empty() ) {
             continue;
         }
-        if( options.max_lines > 0 && processed_lines >= (unsigned) options.max_lines ) {
+        if( options.dataset.max_lines > 0 &&
+            processed_lines >= (unsigned) options.dataset.max_lines ) {
             break;
         }
         line_buf.push_back( line );
+        ++domain_lengths[line.size()];
         // If line buffer is big enough, learn each classifier in separate thread
         if( line_buf.size() == 16384 ) {
 #pragma omp parallel for
@@ -120,13 +126,41 @@ int main( int argc, char* const argv[] )
             line_buf.clear();
         }
         ++processed_lines;
+        // Print results in real-time
         if( processed_lines % 1024 == 0 ) {
             std::cout << "\rProcessed lines: " << processed_lines << "    " << std::flush;
         }
     }
 
+    // Calculate lengths distribution
+    unsigned max_domain_length = 0;
+    for( auto& d: domain_lengths ) {
+        max_domain_length = std::max( max_domain_length, d.first );
+    }
+    unsigned all_domain_num = 0;
+    for( auto& d: domain_lengths ) {
+        all_domain_num += d.second;
+    }
+    std::vector<double> domains_lengths_freqencies( max_domain_length + 1, 0 );
+    for( auto& freq: domain_lengths ) {
+        domains_lengths_freqencies[freq.first] =
+          double( freq.second ) / double( all_domain_num );
+    }
+    // Calculate length percentile
+    unsigned cumulative        = 0;
+    unsigned percentile_length = 0;
+    for( auto& d: domain_lengths ) {
+        cumulative += d.second;
+        if( double( cumulative ) / all_domain_num > options.max_length.percentile ) {
+            percentile_length = d.first;
+            break;
+        }
+    }
+
     // Create model file
     snort::dns_firewall::Model model;
+    model.query_max_length   = percentile_length;
+    model.max_length_penalty = options.max_length.penalty;
     for( auto& f: fifos ) {
         unsigned win_width = f.get_window_width();
         model.entropy_distribution[win_width] =
@@ -140,6 +174,12 @@ int main( int argc, char* const argv[] )
 
     if( save_graphs ) {
         model.save_graphs( graphs_path );
+
+        std::ofstream fs( graphs_path + "domains_lengths.csv" );
+        for( auto& length_freq: domains_lengths_freqencies ) {
+            fs << length_freq << std::endl;
+        }
+        fs.close();
     }
 
     return 0;

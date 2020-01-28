@@ -75,37 +75,25 @@ std::ostream& operator<<( std::ostream& os, const Config::TimeframeConfig& timef
 
 bool Config::HmmConfig::operator==( const Config::HmmConfig& operand2 ) const
 {
-    return weight == operand2.weight;
+    return min_length == operand2.min_length && weight == operand2.weight;
 }
 
 std::ostream& operator<<( std::ostream& os, const Config::HmmConfig& hmm )
 {
+    os << "[DNS Firewall]    * min-length: " << hmm.min_length << std::endl;
     os << "[DNS Firewall]    * weight: " << hmm.weight;
     return os;
 }
 
 bool Config::EntropyConfig::operator==( const Config::EntropyConfig& operand2 ) const
 {
-    return weight == operand2.weight;
+    return min_length == operand2.min_length && weight == operand2.weight;
 }
 
 std::ostream& operator<<( std::ostream& os, const Config::EntropyConfig& entropy )
 {
+    os << "[DNS Firewall]    * min-length: " << entropy.min_length << std::endl;
     os << "[DNS Firewall]    * weight: " << entropy.weight;
-    return os;
-}
-
-bool Config::LengthConfig::operator==( const Config::LengthConfig& operand2 ) const
-{
-    return min_length == operand2.min_length && max_length == operand2.max_length &&
-           max_length_penalty == operand2.max_length_penalty;
-}
-
-std::ostream& operator<<( std::ostream& os, const Config::LengthConfig& length )
-{
-    os << "[DNS Firewall]    * min-length: " << length.min_length << std::endl;
-    os << "[DNS Firewall]    * max-length: " << length.max_length << std::endl;
-    os << "[DNS Firewall]    * max-length-penalty: " << length.max_length_penalty;
     return os;
 }
 
@@ -155,12 +143,11 @@ Config::Config( const std::string& config_filename )
     timeframe.period      = node["plugin"]["timeframe"]["period"].as<int>();
     timeframe.max_queries = node["plugin"]["timeframe"]["max-queries"].as<int>();
 
-    length.min_length         = node["plugin"]["length"]["min-length"].as<int>();
-    length.max_length         = node["plugin"]["length"]["max-length"].as<int>();
-    length.max_length_penalty = node["plugin"]["length"]["max-length-penalty"].as<double>();
-
+    hmm.min_length = node["plugin"]["hmm"]["min-length"].as<int>();
     hmm.weight     = node["plugin"]["hmm"]["weight"].as<int>();
-    entropy.weight = node["plugin"]["entropy"]["weight"].as<int>();
+
+    entropy.min_length = node["plugin"]["entropy"]["min-length"].as<int>();
+    entropy.weight     = node["plugin"]["entropy"]["weight"].as<int>();
 
     short_reject.block_period = node["plugin"]["short-reject"]["block-period"].as<int>();
     short_reject.threshold    = node["plugin"]["short-reject"]["threshold"].as<int>();
@@ -179,9 +166,8 @@ bool Config::operator==( const Config& operand2 ) const
     return mode == operand2.mode && model == operand2.model &&
            blacklist == operand2.blacklist && whitelist == operand2.whitelist &&
            timeframe == operand2.timeframe && hmm == operand2.hmm &&
-           entropy == operand2.entropy && length == operand2.length &&
-           short_reject == operand2.short_reject && long_reject == operand2.long_reject &&
-           permanent_reject == operand2.permanent_reject;
+           entropy == operand2.entropy && short_reject == operand2.short_reject &&
+           long_reject == operand2.long_reject && permanent_reject == operand2.permanent_reject;
 }
 
 std::ostream& operator<<( std::ostream& os, const Config& options )

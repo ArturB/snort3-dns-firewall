@@ -17,6 +17,30 @@
 
 namespace snort { namespace dns_firewall { namespace trainer {
 
+bool Config::DatasetConfig::operator==( const Config::DatasetConfig& operand2 ) const
+{
+    return filename == operand2.filename && max_lines == operand2.max_lines;
+}
+
+std::ostream& operator<<( std::ostream& os, const Config::DatasetConfig& dataset )
+{
+    os << "   * filename: " << dataset.filename << std::endl;
+    os << "   * max-lines: " << dataset.max_lines;
+    return os;
+}
+
+bool Config::MaxLengthConfig::operator==( const Config::MaxLengthConfig& operand2 ) const
+{
+    return percentile == operand2.percentile && penalty == operand2.penalty;
+}
+
+std::ostream& operator<<( std::ostream& os, const Config::MaxLengthConfig& max_length )
+{
+    os << "   * percentile: " << max_length.percentile << std::endl;
+    os << "   * penalty: " << max_length.penalty;
+    return os;
+}
+
 bool Config::EntropyConfig::operator==( const Config::EntropyConfig& operand2 ) const
 {
     return bins == operand2.bins && scale == operand2.scale &&
@@ -48,7 +72,7 @@ std::ostream& operator<<( std::ostream& os, const Config::HmmConfig& hmm )
 bool Config::operator==( const Config& operand2 ) const
 {
     return dataset == operand2.dataset && model_file == operand2.model_file &&
-           max_lines == operand2.max_lines && hmm == operand2.hmm &&
+           max_length == operand2.max_length && hmm == operand2.hmm &&
            entropy == operand2.entropy;
 }
 
@@ -56,18 +80,22 @@ Config::Config( const std::string& config_filename )
 {
     YAML::Node node = YAML::LoadFile( config_filename );
 
-    dataset    = node["trainer"]["dataset"].as<std::string>();
+    dataset.filename  = node["trainer"]["dataset"]["filename"].as<std::string>();
+    dataset.max_lines = node["trainer"]["dataset"]["max-lines"].as<int>();
+
     model_file = node["trainer"]["model-file"].as<std::string>();
-    max_lines  = node["trainer"]["max-lines"].as<int>();
+
+    max_length.percentile = node["trainer"]["max-length"]["percentile"].as<double>();
+    max_length.penalty    = node["trainer"]["max-length"]["penalty"].as<double>();
 
     hmm.hidden_states = node["trainer"]["hmm"]["hidden-states"].as<int>();
 
-    entropy.bins = node["trainer"]["entropy"]["bins"].as<int>();
-
+    entropy.bins          = node["trainer"]["entropy"]["bins"].as<int>();
     std::string log_scale = node["trainer"]["entropy"]["scale"].as<std::string>();
     if( log_scale == "log" ) {
         entropy.scale = snort::dns_firewall::DistributionScale::LOG;
-    } else {
+    }
+    if( log_scale == "linear" ) {
         entropy.scale = snort::dns_firewall::DistributionScale::LINEAR;
     }
 
@@ -79,9 +107,11 @@ Config::Config( const std::string& config_filename )
 
 std::ostream& operator<<( std::ostream& os, const Config& options )
 {
-    os << " - dataset file: " << options.dataset << std::endl;
+    os << " - Dataset: " << std::endl;
+    os << options.dataset << std::endl;
     os << " - output model file: " << options.model_file << std::endl;
-    os << " - max lines processed: " << options.max_lines << std::endl;
+    os << " - Max query length: " << std::endl;
+    os << options.max_length << std::endl;
     os << " - Entropy classifier: " << std::endl;
     os << options.entropy << std::endl;
     os << " - HMM classifier: " << std::endl;

@@ -29,6 +29,9 @@ dns_firewall::IpsOption::IpsOption( const std::string& config_filename )
     // Print current confiuguration
     std::cout << "[DNS Firewall] Current configuration: " << std::endl;
     std::cout << options << std::endl;
+    std::cout << "[DNS Firewall]" << std::endl;
+    std::cout << "[DNS Firewall] Basic model characteristics: " << std::endl;
+    std::cout << model << std::endl;
 }
 
 uint32_t dns_firewall::IpsOption::hash() const

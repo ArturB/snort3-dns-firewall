@@ -50,24 +50,19 @@ struct Config
     };
     struct HmmConfig
     {
+        unsigned min_length;
         unsigned weight;
         bool operator==( const HmmConfig& ) const;
         friend std::ostream& operator<<( std::ostream&, const HmmConfig& );
     };
     struct EntropyConfig
     {
+        unsigned min_length;
         unsigned weight;
         bool operator==( const EntropyConfig& ) const;
         friend std::ostream& operator<<( std::ostream&, const EntropyConfig& );
     };
-    struct LengthConfig
-    {
-        unsigned min_length;
-        unsigned max_length;
-        double max_length_penalty;
-        bool operator==( const LengthConfig& ) const;
-        friend std::ostream& operator<<( std::ostream&, const LengthConfig& );
-    };
+
     struct RejectConfig
     {
         unsigned block_period;
@@ -85,7 +80,6 @@ struct Config
     TimeframeConfig timeframe;
     HmmConfig hmm;
     EntropyConfig entropy;
-    LengthConfig length;
     RejectConfig short_reject;
     RejectConfig long_reject;
     RejectConfig permanent_reject;
