@@ -20,6 +20,7 @@
 #include "dns_packet.h"
 #include "entropy/dns_classifier.h"
 #include "hmm/dns_classifier.h"
+#include "model.h"
 #include "timeframe/dns_classifier.h"
 
 namespace snort { namespace dns_firewall {
@@ -38,6 +39,8 @@ class DnsClassifier
   public:
     explicit DnsClassifier( const Config& );
     Classification classify( const DnsPacket& );
+    void learn( const DnsPacket& );
+    Model create_model() const;
 };
 
 }} // namespace snort::dns_firewall

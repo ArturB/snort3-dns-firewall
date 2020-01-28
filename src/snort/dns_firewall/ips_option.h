@@ -17,6 +17,7 @@
 
 #include "config.h"
 #include "dns_classifier.h"
+#include "model.h"
 #include <framework/ips_option.h>
 #include <protocols/packet.h>
 
@@ -26,7 +27,9 @@ class IpsOption : public snort::IpsOption
 {
   private:
     Config options;
+    Model model;
     DnsClassifier classifier;
+    unsigned processed_queries; // statistics
 
   public:
     explicit IpsOption( const std::string& );

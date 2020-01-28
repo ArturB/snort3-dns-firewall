@@ -22,9 +22,21 @@ std::ostream& operator<<( std::ostream& os, const Config::Mode& mode )
     if( mode == Config::Mode::SIMPLE ) {
         os << "simple";
     }
-    if( mode == Config::Mode::LIVE ) {
-        os << "live";
+    if( mode == Config::Mode::LEARN ) {
+        os << "learn";
     }
+    return os;
+}
+
+bool Config::ModelConfig::operator==( const Config::ModelConfig& operand2 ) const
+{
+    return filename == operand2.filename && weight == operand2.weight;
+}
+
+std::ostream& operator<<( std::ostream& os, const Config::ModelConfig& model )
+{
+    os << "[DNS Firewall]    * file: " << model.filename << std::endl;
+    os << "[DNS Firewall]    * weight: " << model.weight;
     return os;
 }
 
@@ -96,13 +108,15 @@ Config::Config( const std::string& config_filename )
     if( node["plugin"]["mode"].as<std::string>() == "simple" ) {
         mode = Config::Mode::SIMPLE;
     }
-    if( node["plugin"]["mode"].as<std::string>() == "live" ) {
-        mode = Config::Mode::LIVE;
+    if( node["plugin"]["mode"].as<std::string>() == "learn" ) {
+        mode = Config::Mode::LEARN;
     }
 
-    model_file = node["plugin"]["model-file"].as<std::string>();
-    whitelist  = node["plugin"]["whitelist"].as<std::string>();
-    blacklist  = node["plugin"]["blacklist"].as<std::string>();
+    model.filename = node["plugin"]["model"]["file"].as<std::string>();
+    model.weight   = node["plugin"]["model"]["weight"].as<int>();
+
+    whitelist = node["plugin"]["whitelist"].as<std::string>();
+    blacklist = node["plugin"]["blacklist"].as<std::string>();
 
     timeframe.period      = node["plugin"]["timeframe"]["period"].as<int>();
     timeframe.max_queries = node["plugin"]["timeframe"]["max-queries"].as<int>();
@@ -128,7 +142,7 @@ Config::Config( const std::string& config_filename )
 
 bool Config::operator==( const Config& operand2 ) const
 {
-    return mode == operand2.mode && model_file == operand2.model_file &&
+    return mode == operand2.mode && model == operand2.model &&
            blacklist == operand2.blacklist && whitelist == operand2.whitelist &&
            timeframe == operand2.timeframe && hmm == operand2.hmm &&
            entropy == operand2.entropy && length == operand2.length &&
@@ -139,7 +153,8 @@ bool Config::operator==( const Config& operand2 ) const
 std::ostream& operator<<( std::ostream& os, const Config& options )
 {
     os << "[DNS Firewall]  - mode: " << options.mode << std::endl;
-    os << "[DNS Firewall]  - model-file: " << options.model_file << std::endl;
+    os << "[DNS Firewall]  - Model: " << std::endl;
+    os << options.model << std::endl;
     os << "[DNS Firewall]  - blacklist file: " << options.blacklist << std::endl;
     os << "[DNS Firewall]  - whitelist file: " << options.whitelist << std::endl;
 

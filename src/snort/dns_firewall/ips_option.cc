@@ -19,8 +19,11 @@ namespace snort { namespace dns_firewall {
 dns_firewall::IpsOption::IpsOption( const std::string& config_filename )
     : options( config_filename )
     , classifier( options )
+    , processed_queries( 0 )
     , snort::IpsOption( "dns_firewall" )
 {
+    // Load model data
+    model.load( options.model.filename );
     // Print current confiuguration
     std::cout << "[DNS Firewall] Current configuration: " << std::endl;
     std::cout << options << std::endl;
@@ -44,16 +47,29 @@ snort::IpsOption::EvalStatus dns_firewall::IpsOption::eval( Cursor&, Packet* p )
                   << std::endl;
         return NO_MATCH;
     }
+    ++processed_queries;
 
+    // Learn mode
+    if( options.mode == Config::Mode::LEARN ) {
+        classifier.learn( dns );
+        model = classifier.create_model();
+        // Save updated model file every 100 queries
+        if( processed_queries % 100 == 0 ) {
+            model.save( options.model.filename );
+        }
+        return NO_MATCH;
+    }
+
+    // Simple mode
     Classification cls = classifier.classify( dns );
     if( cls.note == Classification::Note::WHITELIST ||
         cls.note == Classification::Note::MIN_LENGTH ) {
-        // std::cout << cls << " ACCEPT" << std::endl;
         return NO_MATCH;
     }
     if( cls.note == Classification::Note::BLACKLIST ||
         cls.note == Classification::Note::INVALID_TIMEFRAME ||
-        cls.score < options.short_reject.threshold ) {
+        ( cls.note == Classification::Note::SCORE &&
+          cls.score < options.short_reject.threshold ) ) {
         std::cout << cls << " REJECT" << std::endl;
         return MATCH;
     }

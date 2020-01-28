@@ -15,8 +15,8 @@
 #ifndef SNORT_DNS_FIREWALL_CONFIG_H
 #define SNORT_DNS_FIREWALL_CONFIG_H
 
-#include <string>
 #include <ostream>
+#include <string>
 
 namespace snort { namespace dns_firewall {
 
@@ -25,7 +25,14 @@ struct Config
     enum Mode
     {
         SIMPLE,
-        LIVE
+        LEARN
+    };
+    struct ModelConfig
+    {
+        std::string filename;
+        unsigned weight;
+        bool operator==( const ModelConfig& ) const;
+        friend std::ostream& operator<<( std::ostream&, const ModelConfig& );
     };
     struct TimeframeConfig
     {
@@ -64,7 +71,7 @@ struct Config
     };
 
     Mode mode;
-    std::string model_file;
+    ModelConfig model;
     std::string blacklist;
     std::string whitelist;
     TimeframeConfig timeframe;

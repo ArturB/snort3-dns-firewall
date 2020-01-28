@@ -23,7 +23,7 @@ DnsClassifier::DnsClassifier( const Config& config )
     , timeframe_classifier( config )
 {
     Model model;
-    model.load( options.model_file );
+    model.load( options.model.filename );
 
     // Initialize blacklist
     std::ifstream blacklist_file( options.blacklist );
@@ -43,7 +43,7 @@ DnsClassifier::DnsClassifier( const Config& config )
          ++it ) {
         entropy_classifiers.push_back( entropy::DnsClassifier( it->first, it->second.size() ) );
         entropy_classifiers.back().set_entropy_distribution(
-          it->second, 1000000, DistributionScale::LOG );
+          it->second, options.model.weight, DistributionScale::LOG );
     }
 }
 
@@ -103,6 +103,26 @@ Classification DnsClassifier::classify( const DnsPacket& dns )
         }
     }
     return min_cls;
+}
+
+void DnsClassifier::learn( const DnsPacket& dns )
+{
+    for( auto it = dns.questions.begin(); it != dns.questions.end(); ++it ) {
+        for( auto it2 = entropy_classifiers.begin(); it2 != entropy_classifiers.end(); ++it2 ) {
+            it2->learn( it->qname );
+        }
+    }
+}
+
+Model DnsClassifier::create_model() const
+{
+    Model model;
+    for( unsigned i = 0; i < entropy_classifiers.size(); ++i ) {
+        unsigned win_width = entropy_classifiers[i].get_window_width();
+        model.entropy_distribution[win_width] =
+          entropy_classifiers[i].get_entropy_distribution( DistributionScale::LOG );
+    }
+    return model;
 }
 
 }} // namespace snort::dns_firewall

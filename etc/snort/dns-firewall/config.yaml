@@ -1,6 +1,8 @@
 plugin:
     mode: simple
-    model-file: /etc/snort/dns-firewall/basic.dfw3model
+    model:
+      file: /etc/snort/dns-firewall/basic.dfw3model
+      weight: 1000000
     whitelist:  /etc/snort/dns-firewall/whitelist.txt
     blacklist:  /etc/snort/dns-firewall/blacklist.txt
     timeframe:
