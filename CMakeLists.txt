@@ -19,7 +19,7 @@ set (VERSION_MAJOR 1)
 set (VERSION_MINOR 0)
 set (VERSION_PATCH 0)
 
-set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Necessary includes
@@ -34,13 +34,14 @@ include(RequireLibrary)
 # Check binary dependencies
 require_library(openblas "")
 require_library(armadillo "")
+require_library(omp "")
 require_library(yaml-cpp "")
 
 # Debug and release build
 option ( ENABLE_DEBUG "Enable debugging options (bugreports and developers only)" OFF )
 option ( ENABLE_RELEASE "Enable compiler -O3 optimization flags" ON )
 
-set( CMAKE_CXX_FLAGS "-Wall " )
+set( CMAKE_CXX_FLAGS "-Wall -fopenmp " )
 if ( ENABLE_DEBUG )
     set( CMAKE_BUILD_TYPE "DEBUG" )
     string ( APPEND CMAKE_CXX_FLAGS "-g -DDEBUG " )
@@ -50,7 +51,7 @@ endif ( ENABLE_DEBUG )
 
 if ( ENABLE_RELEASE )
     set( CMAKE_BUILD_TYPE "RELEASE" )
-    string ( APPEND CMAKE_CXX_FLAGS "-O2 " )
+    string ( APPEND CMAKE_CXX_FLAGS "-O3 " )
 endif ( ENABLE_RELEASE )
 
 # Process src dir
@@ -81,6 +82,7 @@ set (CPACK_SOURCE_GENERATOR TGZ)
 message("
 -------------------------------------------------------
 
+System name: ${CMAKE_SYSTEM_NAME}
 Build type: ${CMAKE_BUILD_TYPE}
 
 Build output options:

@@ -180,14 +180,6 @@ void DnsClassifier::set_entropy_distribution( const std::vector<double>& dist,
               return weight * val;
           } );
     }
-    // for( unsigned i = 0; i < dist_bins_; ++i ) {
-    //     if( scale == snort::dns_firewall::DistributionScale::LOG ) {
-    //         distribution_values[i] = ;
-    //     } else {
-    //         distribution_values[i] = weight * dist[i];
-    //     }
-    // }
-    // entropy_distribution_ = distribution_values;
 }
 
 unsigned DnsClassifier::get_distribution_bins() const noexcept

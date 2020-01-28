@@ -51,14 +51,14 @@ DnsClassifier::DnsClassifier( const Config& config )
 Classification DnsClassifier::classify_question( const std::string& domain )
 {
     // Blacklist check
-    if( std::any_of( blacklist.begin(), blacklist.end(), [&domain]( auto blacklisted ) {
+    if( std::any_of( blacklist.begin(), blacklist.end(), [&]( auto blacklisted ) {
             return std::regex_match( domain, std::regex( ".*" + blacklisted ) );
         } ) ) {
         return Classification( domain, Classification::Note::WHITELIST, 0 );
     }
 
     // Whitelist check
-    if( std::any_of( whitelist.begin(), whitelist.end(), [&domain]( auto whitelisted ) {
+    if( std::any_of( whitelist.begin(), whitelist.end(), [&]( auto whitelisted ) {
             return std::regex_match( domain, std::regex( ".*" + whitelisted ) );
         } ) ) {
         return Classification( domain, Classification::Note::WHITELIST, 0 );

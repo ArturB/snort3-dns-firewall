@@ -40,15 +40,17 @@ int main( int argc, char* const argv[] )
     // Parse command line options
     int opt;
     bool save_graphs = false;
+    std::string graphs_path;
     std::string yaml_filename_getopt;
     std::string dataset_filename_getopt;
     std::string model_filename_getopt;
     int max_lines_getopt = -1;
 
-    while( ( opt = getopt( argc, argv, "gc:f:n:o:h" ) ) != -1 ) {
+    while( ( opt = getopt( argc, argv, "g:c:f:n:o:h" ) ) != -1 ) {
         switch( opt ) {
         case 'g':
             save_graphs = true;
+            graphs_path = std::string( optarg );
             break;
         case 'c':
             yaml_filename_getopt = std::string( optarg );
@@ -98,6 +100,7 @@ int main( int argc, char* const argv[] )
     unsigned processed_lines = 0;
 
     std::cout.imbue( std::locale( "" ) );
+    std::vector<std::string> line_buf;
     while( getline( dataset_file, line ) ) {
         if( line.empty() ) {
             continue;
@@ -105,8 +108,16 @@ int main( int argc, char* const argv[] )
         if( options.max_lines > 0 && processed_lines >= (unsigned) options.max_lines ) {
             break;
         }
-        for( auto& f: fifos ) {
-            f.learn( line );
+        line_buf.push_back( line );
+        // If line buffer is big enough, learn each classifier in separate thread
+        if( line_buf.size() == 16384 ) {
+#pragma omp parallel for
+            for( unsigned i = 0; i < fifos.size(); ++i ) {
+                for( auto& l: line_buf ) {
+                    fifos[i].learn( l );
+                }
+            }
+            line_buf.clear();
         }
         ++processed_lines;
         if( processed_lines % 1024 == 0 ) {
@@ -128,7 +139,7 @@ int main( int argc, char* const argv[] )
     std::cout << "Processed lines: " << processed_lines << std::endl;
 
     if( save_graphs ) {
-        model.save_graphs( "bin/rb-" );
+        model.save_graphs( graphs_path );
     }
 
     return 0;

@@ -60,6 +60,7 @@ add_executable(
 target_link_libraries(
     ${TRAINER_NAME}
     armadillo
+    omp
     yaml-cpp
 )
 install (
