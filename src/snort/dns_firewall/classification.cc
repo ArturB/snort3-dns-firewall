@@ -19,6 +19,7 @@ namespace snort { namespace dns_firewall {
 Classification::Classification()
     : note( Note::SCORE )
     , score( 0 )
+    , score2( 0 )
 {
 }
 

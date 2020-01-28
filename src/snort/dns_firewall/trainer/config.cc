@@ -28,8 +28,8 @@ std::ostream& operator<<( std::ostream& os, const Config::EntropyConfig& entropy
     os << "   * distribution bins: " << entropy.bins << std::endl;
     os << "   * distribution scale: " << entropy.scale << std::endl;
     os << "   * window widths: ";
-    for( auto it = entropy.window_widths.begin(); it != entropy.window_widths.end(); ++it ) {
-        os << *it << " ";
+    for( auto& w: entropy.window_widths ) {
+        os << w << " ";
     }
     return os;
 }
@@ -72,8 +72,8 @@ Config::Config( const std::string& config_filename )
     }
 
     YAML::Node win_widths = node["trainer"]["entropy"]["window-widths"];
-    for( auto it = win_widths.begin(); it != win_widths.end(); ++it ) {
-        entropy.window_widths.push_back( it->as<int>() );
+    for( auto&& w: win_widths ) {
+        entropy.window_widths.push_back( w.as<int>() );
     }
 }
 

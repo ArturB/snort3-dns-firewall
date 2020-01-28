@@ -45,10 +45,10 @@ void Model::load( std::string filename )
 void Model::save_graphs( const std::string& filename_prefix,
                          const std::string& filename_suffix )
 {
-    for( auto it = entropy_distribution.begin(); it != entropy_distribution.end(); ++it ) {
-        std::ofstream fs( filename_prefix + std::to_string( it->first ) + filename_suffix );
-        for( unsigned i = 0; i < it->second.size(); ++i ) {
-            fs << it->second[i] << std::endl;
+    for( auto& d: entropy_distribution ) {
+        std::ofstream fs( filename_prefix + std::to_string( d.first ) + filename_suffix );
+        for( auto& val: d.second ) {
+            fs << val << std::endl;
         }
         fs.close();
     }

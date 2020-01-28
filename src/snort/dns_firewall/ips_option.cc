@@ -13,14 +13,16 @@
 // **********************************************************************
 
 #include "ips_option.h"
+#include "classification.h"
+#include "dns_packet.h"
 
 namespace snort { namespace dns_firewall {
 
 dns_firewall::IpsOption::IpsOption( const std::string& config_filename )
-    : options( config_filename )
+    : snort::IpsOption( "dns_firewall" )
+    , options( config_filename )
     , classifier( options )
     , processed_queries( 0 )
-    , snort::IpsOption( "dns_firewall" )
 {
     // Load model data
     model.load( options.model.filename );

@@ -13,6 +13,8 @@
 // **********************************************************************
 
 #include "dns_classifier.h"
+#include "classification.h"
+#include "dns_packet.h"
 #include "model.h"
 #include <regex>
 
@@ -39,28 +41,27 @@ DnsClassifier::DnsClassifier( const Config& config )
     }
     whitelist_file.close();
     // Initialize entropy clasifiers
-    for( auto it = model.entropy_distribution.begin(); it != model.entropy_distribution.end();
-         ++it ) {
-        entropy_classifiers.push_back( entropy::DnsClassifier( it->first, it->second.size() ) );
+    for( auto& d: model.entropy_distribution ) {
+        entropy_classifiers.push_back( entropy::DnsClassifier( d.first, d.second.size() ) );
         entropy_classifiers.back().set_entropy_distribution(
-          it->second, options.model.weight, DistributionScale::LOG );
+          d.second, options.model.weight, DistributionScale::LOG );
     }
 }
 
 Classification DnsClassifier::classify_question( const std::string& domain )
 {
     // Blacklist check
-    for( auto it = blacklist.begin(); it != blacklist.end(); ++it ) {
-        if( std::regex_match( domain, std::regex( ".*" + *it ) ) ) {
-            return Classification( domain, Classification::Note::BLACKLIST, 0 );
-        }
+    if( std::any_of( blacklist.begin(), blacklist.end(), [&domain]( auto blacklisted ) {
+            return std::regex_match( domain, std::regex( ".*" + blacklisted ) );
+        } ) ) {
+        return Classification( domain, Classification::Note::WHITELIST, 0 );
     }
 
     // Whitelist check
-    for( auto it = whitelist.begin(); it != whitelist.end(); ++it ) {
-        if( std::regex_match( domain, std::regex( ".*" + *it ) ) ) {
-            return Classification( domain, Classification::Note::WHITELIST, 0 );
-        }
+    if( std::any_of( whitelist.begin(), whitelist.end(), [&domain]( auto whitelisted ) {
+            return std::regex_match( domain, std::regex( ".*" + whitelisted ) );
+        } ) ) {
+        return Classification( domain, Classification::Note::WHITELIST, 0 );
     }
 
     // Min length check
@@ -79,8 +80,8 @@ Classification DnsClassifier::classify_question( const std::string& domain )
 
     double entropy_score = 0;
     // Entropy score
-    for( auto it = entropy_classifiers.begin(); it != entropy_classifiers.end(); ++it ) {
-        entropy_score += it->classify( domain );
+    for( auto& c: entropy_classifiers ) {
+        entropy_score += c.classify( domain );
     }
     entropy_score /= entropy_classifiers.size();
 
@@ -96,8 +97,8 @@ Classification DnsClassifier::classify_question( const std::string& domain )
 Classification DnsClassifier::classify( const DnsPacket& dns )
 {
     Classification min_cls;
-    for( auto it = dns.questions.begin(); it != dns.questions.end(); ++it ) {
-        Classification cls = classify_question( it->qname );
+    for( auto& q: dns.questions ) {
+        Classification cls = classify_question( q.qname );
         if( cls < min_cls ) {
             min_cls = cls;
         }
@@ -107,9 +108,10 @@ Classification DnsClassifier::classify( const DnsPacket& dns )
 
 void DnsClassifier::learn( const DnsPacket& dns )
 {
-    for( auto it = dns.questions.begin(); it != dns.questions.end(); ++it ) {
-        for( auto it2 = entropy_classifiers.begin(); it2 != entropy_classifiers.end(); ++it2 ) {
-            it2->learn( it->qname );
+    for( auto& q: dns.questions ) {
+        for( auto& c: entropy_classifiers ) {
+            std::cout << "Learn " << c.get_window_width() << std::endl;
+            c.learn( q.qname );
         }
     }
 }
@@ -117,10 +119,10 @@ void DnsClassifier::learn( const DnsPacket& dns )
 Model DnsClassifier::create_model() const
 {
     Model model;
-    for( unsigned i = 0; i < entropy_classifiers.size(); ++i ) {
-        unsigned win_width = entropy_classifiers[i].get_window_width();
+    for( auto& c: entropy_classifiers ) {
+        unsigned win_width = c.get_window_width();
         model.entropy_distribution[win_width] =
-          entropy_classifiers[i].get_entropy_distribution( DistributionScale::LOG );
+          c.get_entropy_distribution( DistributionScale::LOG );
     }
     return model;
 }

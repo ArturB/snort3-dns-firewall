@@ -19,7 +19,7 @@ set (VERSION_MAJOR 1)
 set (VERSION_MINOR 0)
 set (VERSION_PATCH 0)
 
-set (CMAKE_CXX_STANDARD 11)
+set (CMAKE_CXX_STANDARD 14)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Necessary includes
@@ -40,7 +40,7 @@ require_library(yaml-cpp "")
 option ( ENABLE_DEBUG "Enable debugging options (bugreports and developers only)" OFF )
 option ( ENABLE_RELEASE "Enable compiler -O3 optimization flags" ON )
 
-set( CMAKE_CXX_FLAGS "" )
+set( CMAKE_CXX_FLAGS "-Wall " )
 if ( ENABLE_DEBUG )
     set( CMAKE_BUILD_TYPE "DEBUG" )
     string ( APPEND CMAKE_CXX_FLAGS "-g -DDEBUG " )

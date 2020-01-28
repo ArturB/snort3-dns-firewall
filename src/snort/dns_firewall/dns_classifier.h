@@ -15,15 +15,16 @@
 #ifndef SNORT_DNS_FIREWALL_DNS_CLASSIFIER_H
 #define SNORT_DNS_FIREWALL_DNS_CLASSIFIER_H
 
-#include "classification.h"
 #include "config.h"
-#include "dns_packet.h"
 #include "entropy/dns_classifier.h"
 #include "hmm/dns_classifier.h"
-#include "model.h"
 #include "timeframe/dns_classifier.h"
 
 namespace snort { namespace dns_firewall {
+
+struct Classification;
+struct DnsPacket;
+struct Model;
 
 class DnsClassifier
 {

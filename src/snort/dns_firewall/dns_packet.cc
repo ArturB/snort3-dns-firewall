@@ -23,8 +23,8 @@ DnsPacket::DnsPacket( const uint8_t* data, unsigned dsize )
     , answer_num( ( data[6] << 8 ) + data[7] )
     , authority_num( ( data[8] << 8 ) + data[9] )
     , additional_num( ( data[10] << 8 ) + data[11] )
-    , malformed( false )
     , questions()
+    , malformed( false )
 {
     unsigned cursor_pos = 12;
     for( unsigned i = 0; i < this->question_num; ++i ) {

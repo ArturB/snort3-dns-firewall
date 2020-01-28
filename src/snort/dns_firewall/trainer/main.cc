@@ -89,9 +89,8 @@ int main( int argc, char* const argv[] )
 
     // Create line_processor objects
     std::vector<entropy::DnsClassifier> fifos;
-    for( unsigned i = 0; i < options.entropy.window_widths.size(); ++i ) {
-        fifos.push_back(
-          entropy::DnsClassifier( options.entropy.window_widths[i], options.entropy.bins ) );
+    for( auto& w: options.entropy.window_widths ) {
+        fifos.push_back( entropy::DnsClassifier( w, options.entropy.bins ) );
     }
     // Process data line by line
     std::ifstream dataset_file( options.dataset );
@@ -99,13 +98,15 @@ int main( int argc, char* const argv[] )
     unsigned processed_lines = 0;
 
     std::cout.imbue( std::locale( "" ) );
-    while( getline( dataset_file, line ) && processed_lines < options.max_lines ) {
+    while( getline( dataset_file, line ) ) {
         if( line.empty() ) {
             continue;
-        } else {
-            for( unsigned i = 0; i < fifos.size(); ++i ) {
-                fifos[i].learn( line );
-            }
+        }
+        if( options.max_lines > 0 && processed_lines >= (unsigned) options.max_lines ) {
+            break;
+        }
+        for( auto& f: fifos ) {
+            f.learn( line );
         }
         ++processed_lines;
         if( processed_lines % 1024 == 0 ) {
@@ -115,10 +116,10 @@ int main( int argc, char* const argv[] )
 
     // Create model file
     snort::dns_firewall::Model model;
-    for( unsigned i = 0; i < fifos.size(); ++i ) {
-        unsigned win_width = fifos[i].get_window_width();
+    for( auto& f: fifos ) {
+        unsigned win_width = f.get_window_width();
         model.entropy_distribution[win_width] =
-          fifos[i].get_entropy_distribution( options.entropy.scale );
+          f.get_entropy_distribution( options.entropy.scale );
     }
 
     // Save result distribution to file

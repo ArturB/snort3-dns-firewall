@@ -13,17 +13,20 @@
 // **********************************************************************
 
 #include "dns_classifier.h"
+#include "iostream"
+#include <algorithm>
 #include <cmath>
+#include <numeric>
 
 namespace snort { namespace dns_firewall { namespace entropy {
 
 DnsClassifier::DnsClassifier( unsigned window_width, unsigned bins ) noexcept
-    : window_width_( window_width )
+    : dns_fifo_size_( 0 )
+    , current_metric_( 0 )
+    , window_width_( window_width )
     , entropy_distribution_( bins, 0 )
     , dist_bins_( bins )
     , state_shift_( false )
-    , current_metric_( 0 )
-    , dns_fifo_size_( 0 )
 {
 }
 
@@ -34,7 +37,7 @@ std::string DnsClassifier::get_dns_xld( const std::string& domain, unsigned leve
 {
     char delimiter             = '.';
     unsigned delimiters_passed = 0;
-    for( unsigned long i = domain.length() - 1; i > 0; --i ) {
+    for( unsigned i = domain.length() - 1; i > 0; --i ) {
         if( domain[i] == delimiter ) {
             ++delimiters_passed;
             if( delimiters_passed == level )
@@ -51,7 +54,6 @@ double DnsClassifier::domain_metric( unsigned domain_val ) const noexcept
         return 0.0;
     } else {
         double domain_freq = double( domain_val ) / double( dns_fifo_size_ );
-
         return -1 * domain_freq * log( domain_freq );
     }
 }
@@ -59,10 +61,10 @@ double DnsClassifier::domain_metric( unsigned domain_val ) const noexcept
 // Calculate given metric for dns_fifo
 double DnsClassifier::fifo_metric() const noexcept
 {
-    double metric_value = 0;
-    for( auto it = freq_.begin(); it != freq_.end(); ++it ) {
-        metric_value += domain_metric( it->second );
-    }
+    double metric_value =
+      std::accumulate( freq_.begin(), freq_.end(), 0, [this]( auto acc, auto f2 ) {
+          return acc + domain_metric( f2.second );
+      } );
     return metric_value / log( dns_fifo_.size() );
 }
 
@@ -135,28 +137,27 @@ DnsClassifier::get_entropy_distribution( snort::dns_firewall::DistributionScale 
 {
     std::vector<double> distribution_values = std::vector<double>( dist_bins_, 0 );
 
-    unsigned observations_count = 0;
-    for( unsigned i = 0; i < dist_bins_; ++i ) {
-        observations_count += entropy_distribution_[i];
-    }
+    unsigned observations_count =
+      std::accumulate( entropy_distribution_.begin(), entropy_distribution_.end(), 0 );
 
     if( scale == snort::dns_firewall::DistributionScale::LOG ) {
-        for( unsigned i = 0; i < dist_bins_; ++i ) {
-            distribution_values[i] = entropy_distribution_[i] + 1;
-        }
-        for( unsigned i = 0; i < dist_bins_; ++i ) {
-            distribution_values[i] =
-              log10( double( distribution_values[i] ) / double( observations_count ) );
-        }
+        std::transform( entropy_distribution_.begin(),
+                        entropy_distribution_.end(),
+                        distribution_values.begin(),
+                        [&]( const auto& v ) {
+                            return log10( double( v + 1 ) / double( observations_count ) );
+                        } );
     } else {
-        for( unsigned i = 0; i < dist_bins_; ++i ) {
-            distribution_values[i] =
-              double( entropy_distribution_[i] ) / double( observations_count );
-        }
+        std::transform( entropy_distribution_.begin(),
+                        entropy_distribution_.end(),
+                        distribution_values.begin(),
+                        [&]( const auto& v ) {
+                            return double( v ) / double( observations_count );
+                        } );
     }
 
     return distribution_values;
-}
+} // namespace entropy
 
 void DnsClassifier::set_entropy_distribution( const std::vector<double>& dist,
                                               unsigned weight,
@@ -164,15 +165,29 @@ void DnsClassifier::set_entropy_distribution( const std::vector<double>& dist,
 {
     dist_bins_ = dist.size();
 
-    std::vector<unsigned> distribution_values = std::vector<unsigned>( dist_bins_, 0 );
-    for( unsigned i = 0; i < dist_bins_; ++i ) {
-        if( scale == snort::dns_firewall::DistributionScale::LOG ) {
-            distribution_values[i] = weight * pow( 10, dist[i] );
-        } else {
-            distribution_values[i] = weight * dist[i];
-        }
+    // std::vector<unsigned> distribution_values = std::vector<unsigned>( dist_bins_, 0 );
+    if( scale == snort::dns_firewall::DistributionScale::LOG ) {
+
+        std::transform(
+          dist.begin(), dist.end(), entropy_distribution_.begin(), [&]( const auto& val ) {
+              return weight * pow( 10, val );
+          } );
+
+    } else {
+
+        std::transform(
+          dist.begin(), dist.end(), entropy_distribution_.begin(), [&]( const auto& val ) {
+              return weight * val;
+          } );
     }
-    entropy_distribution_ = distribution_values;
+    // for( unsigned i = 0; i < dist_bins_; ++i ) {
+    //     if( scale == snort::dns_firewall::DistributionScale::LOG ) {
+    //         distribution_values[i] = ;
+    //     } else {
+    //         distribution_values[i] = weight * dist[i];
+    //     }
+    // }
+    // entropy_distribution_ = distribution_values;
 }
 
 unsigned DnsClassifier::get_distribution_bins() const noexcept
@@ -189,6 +204,12 @@ void DnsClassifier::learn( const std::string& domain ) noexcept
 {
     if( state_shift_ ) {
         forward_shift( get_dns_xld( domain, 2 ) );
+
+        // std::cout << "Fifo, state_shift = " << state_shift_
+        //           << ",dns_fifo_.size() = " << dns_fifo_.size() << " metric " <<
+        //           current_metric_
+        //           << std::endl;
+
         unsigned distribution_bin = floor( current_metric_ * dist_bins_ );
         ++entropy_distribution_[distribution_bin];
     } else {
@@ -211,20 +232,12 @@ double DnsClassifier::classify( const std::string& domain ) noexcept
     }
 
     forward_shift( fld );
-    unsigned distribution_bin   = floor( current_metric_ * dist_bins_ );
-    unsigned observations_count = 0;
-    for( unsigned i = 0; i < dist_bins_; ++i ) {
-        observations_count += entropy_distribution_[i];
-    }
+    unsigned distribution_bin = floor( current_metric_ * dist_bins_ );
+    unsigned observations_count =
+      std::accumulate( entropy_distribution_.begin(), entropy_distribution_.end(), 0 );
     double metric_probability =
       double( entropy_distribution_[distribution_bin] ) / double( observations_count );
     double domain_freq = double( freq_[fld] ) / double( dns_fifo_size_ );
-    // if( fld == "best-malware.com" && domain_freq > 0.5 ) {
-    //     std::cout << "FREQ: " << domain_freq << std::endl;
-    //     for( auto it = freq_.begin(); it != freq_.end(); ++it ) {
-    //         std::cout << it->first << ", " << it->second << std::endl;
-    //     }
-    // }
     if( metric_probability < 1e-10 ) {
         return domain_freq * log10( 1 / double( observations_count ) );
     } else {
