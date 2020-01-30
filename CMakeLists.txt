@@ -29,6 +29,7 @@ set(CMAKE_MODULE_PATH
 )
 include(CPack)
 include(CheckCXXCompilerFlag)
+include(GNUInstallDirs)
 include(RequireLibrary)
 
 # Check binary dependencies
@@ -60,7 +61,6 @@ add_subdirectory ( src )
 add_subdirectory( etc )
 
 # Output dirs
-set(CMAKE_INSTALL_PREFIX "/usr/local")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
@@ -91,9 +91,9 @@ Build output options:
     RUNT_OUT:  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 
 Install options:
-    RUNT_DIR:  ${CMAKE_INSTALL_PREFIX}/bin/${CMAKE_PROJECT_NAME}
-    LIBR_DIR:  ${CMAKE_INSTALL_PREFIX}/lib64/snort/${CMAKE_PROJECT_NAME}
-    INCL_DIR:  ${CMAKE_INSTALL_PREFIX}/include/snort/${CMAKE_PROJECT_NAME}
+    BIN_DIR:   ${CMAKE_INSTALL_FULL_BINDIR}/snort/${CMAKE_PROJECT_NAME}
+    LIB_DIR:   ${CMAKE_INSTALL_FULL_LIBDIR}/snort/${CMAKE_PROJECT_NAME}
+    CONF_DIR:  ${CMAKE_INSTALL_FULL_SYSCONFDIR}/snort/${CMAKE_PROJECT_NAME}
 
 Compiler options:
     CXX:            ${CMAKE_CXX_COMPILER}

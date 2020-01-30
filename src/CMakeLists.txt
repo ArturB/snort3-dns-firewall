@@ -23,6 +23,10 @@ include_directories(
 set(LIBRARY_NAME "snort3dfw")
 set(TRAINER_NAME "dfw3trainer")
 
+# *********************
+# PLUGIN SHARED OBJECT
+# *********************
+
 add_library (
     ${LIBRARY_NAME} MODULE
         snort/dns_firewall/classification.cc
@@ -45,8 +49,13 @@ target_link_libraries(
 )
 install (
     TARGETS ${LIBRARY_NAME}
-    LIBRARY DESTINATION "lib64/snort/${CMAKE_PROJECT_NAME}"
+    LIBRARY DESTINATION
+        ${CMAKE_INSTALL_FULL_LIBDIR}/snort/${CMAKE_PROJECT_NAME}
 )
+
+# *******************
+# TRAINER EXECUTABLE
+# *******************
 
 add_executable(
     ${TRAINER_NAME}
@@ -65,5 +74,6 @@ target_link_libraries(
 )
 install (
     TARGETS ${TRAINER_NAME}
-    RUNTIME DESTINATION "lib64/snort/${CMAKE_PROJECT_NAME}"
+    RUNTIME DESTINATION
+        ${CMAKE_INSTALL_FULL_BINDIR}/snort/${CMAKE_PROJECT_NAME}
 )
