@@ -28,19 +28,25 @@ Model::Model()
 {
 }
 
-void Model::save( std::string filename )
+template<class Archive>
+void Model::serialize( Archive& archive )
+{
+    archive( query_max_length, max_length_penalty, bins, entropy_distribution );
+}
+
+void Model::save_to_file( std::string filename )
 {
     std::ofstream fs( filename );
     cereal::BinaryOutputArchive oarchive( fs );
-    oarchive( query_max_length, max_length_penalty, bins, entropy_distribution );
+    oarchive( *this );
     fs.close();
 }
 
-void Model::load( std::string filename )
+void Model::load_from_file( std::string filename )
 {
     std::ifstream fs( filename );
     cereal::BinaryInputArchive iarchive( fs );
-    iarchive( query_max_length, max_length_penalty, bins, entropy_distribution );
+    iarchive( *this );
     fs.close();
 }
 
@@ -49,8 +55,10 @@ void Model::save_graphs( const std::string& filename_prefix,
 {
     for( auto& d: entropy_distribution ) {
         std::ofstream fs( filename_prefix + std::to_string( d.first ) + filename_suffix );
+        double i = 1;
         for( auto& val: d.second ) {
-            fs << val << std::endl;
+            fs << i / d.second.size() << ";" << val << std::endl;
+            ++i;
         }
         fs.close();
     }

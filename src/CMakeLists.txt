@@ -23,6 +23,14 @@ include_directories(
 set(LIBRARY_NAME "snort3dfw")
 set(TRAINER_NAME "dfw3trainer")
 
+# ******************
+# SMART-HMM LIBRARY
+# ******************
+
+include_directories(
+    scientific/ml
+)
+
 # *********************
 # PLUGIN SHARED OBJECT
 # *********************

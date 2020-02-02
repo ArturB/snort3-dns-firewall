@@ -27,7 +27,7 @@ DnsClassifier::DnsClassifier( const Config& config )
     , timeframe_classifier( config )
 {
     Model model;
-    model.load( options.model.filename );
+    model.load_from_file( options.model.filename );
 
     query_max_length   = model.query_max_length;
     max_length_penalty = model.max_length_penalty;
@@ -83,8 +83,8 @@ Classification DnsClassifier::classify_question( const std::string& domain )
     // ****************
     // Timeframe check
     // ****************
-    if( timeframe_classifier.insert( domain ) ==
-        timeframe::DnsClassifier::Classification::INVALID ) {
+    if( options.timeframe.enabled && timeframe_classifier.insert( domain ) ==
+                                       timeframe::DnsClassifier::Classification::INVALID ) {
         return Classification( domain,
                                Classification::Note::INVALID_TIMEFRAME,
                                timeframe_classifier.get_current_queries(),
@@ -94,13 +94,18 @@ Classification DnsClassifier::classify_question( const std::string& domain )
     // ****************
     // HMM CLASSIFIER
     // ****************
-    double hmm_score = 0;
+    double hmm_score  = 0;
+    double hmm_weight = options.hmm.enabled ? options.hmm.weight : 0;
+    if( options.hmm.enabled && domain.size() >= options.hmm.min_length ) {
+    }
 
     // *******************
     // ENTROPY CLASSIFIER
     // *******************
-    double entropy_score = 0;
-    if( domain.size() >= options.entropy.min_length ) { // Min length check
+    double entropy_score  = 0;
+    double entropy_weight = options.entropy.enabled ? options.entropy.weight : 0;
+    if( options.entropy.enabled &&
+        domain.size() >= options.entropy.min_length ) { // Min length check
         // Average score from each entropy classifier
         for( auto& c: entropy_classifiers ) {
             entropy_score += c.classify( domain );
@@ -111,9 +116,11 @@ Classification DnsClassifier::classify_question( const std::string& domain )
     // *******************
     // TOTAL SCORE
     // *******************
-    double score =
-      ( options.hmm.weight * hmm_score ) + ( options.entropy.weight * entropy_score ) /
-                                             ( options.hmm.weight + options.entropy.weight );
+    double score = 0;
+    if( hmm_weight + entropy_weight > 0 ) {
+        score = ( hmm_weight * hmm_score ) +
+                ( entropy_weight * entropy_score ) / ( hmm_weight + entropy_weight );
+    }
 
     // *******************
     // MAX LENGTH PENALTY

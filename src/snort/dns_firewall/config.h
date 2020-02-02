@@ -43,6 +43,7 @@ struct Config
     };
     struct TimeframeConfig
     {
+        bool enabled;
         unsigned period;
         unsigned max_queries;
         bool operator==( const TimeframeConfig& ) const;
@@ -50,6 +51,7 @@ struct Config
     };
     struct HmmConfig
     {
+        bool enabled;
         unsigned min_length;
         unsigned weight;
         bool operator==( const HmmConfig& ) const;
@@ -57,6 +59,7 @@ struct Config
     };
     struct EntropyConfig
     {
+        bool enabled;
         unsigned min_length;
         unsigned weight;
         bool operator==( const EntropyConfig& ) const;

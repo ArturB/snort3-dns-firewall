@@ -40,6 +40,8 @@ struct Config
     struct HmmConfig
     {
         unsigned hidden_states;
+        double learning_rate;
+        unsigned batch_size;
         bool operator==( const HmmConfig& ) const;
         friend std::ostream& operator<<( std::ostream&, const HmmConfig& );
     };

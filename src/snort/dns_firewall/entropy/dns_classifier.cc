@@ -147,14 +147,16 @@ DnsClassifier::get_entropy_distribution( snort::dns_firewall::DistributionScale 
                         entropy_distribution_.end(),
                         distribution_values.begin(),
                         [&]( const auto& v ) {
-                            return log10( double( v + 1 ) / double( observations_count ) );
+                            return log10( double( v + 1 ) * dist_bins_ /
+                                          double( observations_count ) );
                         } );
     } else {
         std::transform( entropy_distribution_.begin(),
                         entropy_distribution_.end(),
                         distribution_values.begin(),
                         [&]( const auto& v ) {
-                            return double( v ) / double( observations_count );
+                            return double( v ) * dist_bins_ /
+                                   double( observations_count );
                         } );
     }
 

@@ -15,6 +15,8 @@
 #ifndef SNORT_DNS_FIREWALL_MODEL_H
 #define SNORT_DNS_FIREWALL_MODEL_H
 
+#include "smart_hmm.h"
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -22,14 +24,19 @@ namespace snort { namespace dns_firewall {
 
 struct Model
 {
+    scientific::ml::Hmm<char, std::string> hmm;
     unsigned query_max_length;
     double max_length_penalty;
     unsigned bins;
     std::unordered_map<unsigned, std::vector<double>> entropy_distribution;
 
     Model();
-    void save( std::string filename );
-    void load( std::string filename );
+
+    template<class Archive>
+    void serialize( Archive& );
+
+    void save_to_file( std::string filename );
+    void load_from_file( std::string filename );
     void save_graphs( const std::string&, const std::string& = ".csv" );
 
     friend std::ostream& operator<<( std::ostream&, const Model& );

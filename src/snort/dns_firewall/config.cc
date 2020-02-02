@@ -63,11 +63,14 @@ std::ostream& operator<<( std::ostream& os, const Config::ModelConfig& model )
 
 bool Config::TimeframeConfig::operator==( const Config::TimeframeConfig& operand2 ) const
 {
-    return period == operand2.period && max_queries == operand2.max_queries;
+    return enabled == operand2.enabled && period == operand2.period &&
+           max_queries == operand2.max_queries;
 }
 
 std::ostream& operator<<( std::ostream& os, const Config::TimeframeConfig& timeframe )
 {
+    os << "[DNS Firewall]    * enabled: " << ( timeframe.enabled ? "true" : "false" )
+       << std::endl;
     os << "[DNS Firewall]    * period: " << timeframe.period << std::endl;
     os << "[DNS Firewall]    * max-queries: " << timeframe.max_queries;
     return os;
@@ -75,11 +78,13 @@ std::ostream& operator<<( std::ostream& os, const Config::TimeframeConfig& timef
 
 bool Config::HmmConfig::operator==( const Config::HmmConfig& operand2 ) const
 {
-    return min_length == operand2.min_length && weight == operand2.weight;
+    return enabled == operand2.enabled && min_length == operand2.min_length &&
+           weight == operand2.weight;
 }
 
 std::ostream& operator<<( std::ostream& os, const Config::HmmConfig& hmm )
 {
+    os << "[DNS Firewall]    * enabled: " << ( hmm.enabled ? "true" : "false" ) << std::endl;
     os << "[DNS Firewall]    * min-length: " << hmm.min_length << std::endl;
     os << "[DNS Firewall]    * weight: " << hmm.weight;
     return os;
@@ -87,11 +92,14 @@ std::ostream& operator<<( std::ostream& os, const Config::HmmConfig& hmm )
 
 bool Config::EntropyConfig::operator==( const Config::EntropyConfig& operand2 ) const
 {
-    return min_length == operand2.min_length && weight == operand2.weight;
+    return enabled == operand2.enabled && min_length == operand2.min_length &&
+           weight == operand2.weight;
 }
 
 std::ostream& operator<<( std::ostream& os, const Config::EntropyConfig& entropy )
 {
+    os << "[DNS Firewall]    * enabled: " << ( entropy.enabled ? "true" : "false" )
+       << std::endl;
     os << "[DNS Firewall]    * min-length: " << entropy.min_length << std::endl;
     os << "[DNS Firewall]    * weight: " << entropy.weight;
     return os;
@@ -140,12 +148,15 @@ Config::Config( const std::string& config_filename )
     whitelist = node["plugin"]["whitelist"].as<std::string>();
     blacklist = node["plugin"]["blacklist"].as<std::string>();
 
+    timeframe.enabled     = node["plugin"]["timeframe"]["enabled"].as<bool>();
     timeframe.period      = node["plugin"]["timeframe"]["period"].as<int>();
     timeframe.max_queries = node["plugin"]["timeframe"]["max-queries"].as<int>();
 
+    hmm.enabled    = node["plugin"]["hmm"]["enabled"].as<bool>();
     hmm.min_length = node["plugin"]["hmm"]["min-length"].as<int>();
     hmm.weight     = node["plugin"]["hmm"]["weight"].as<int>();
 
+    entropy.enabled    = node["plugin"]["entropy"]["enabled"].as<bool>();
     entropy.min_length = node["plugin"]["entropy"]["min-length"].as<int>();
     entropy.weight     = node["plugin"]["entropy"]["weight"].as<int>();
 

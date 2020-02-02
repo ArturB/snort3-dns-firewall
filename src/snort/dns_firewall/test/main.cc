@@ -12,11 +12,9 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
-#include "distribution_scale.h"
 #include "entropy/dns_classifier.h"
 #include "hmm/dns_classifier.h"
 #include "model.h"
-#include "smart_hmm.h"
 #include "trainer/config.h"
 
 extern char* optarg;
@@ -168,20 +166,14 @@ int main( int argc, char* const argv[] )
         model.entropy_distribution[win_width] =
           f.get_entropy_distribution( options.entropy.scale );
     }
-    model.bins = options.entropy.bins;
 
     // Save result distribution to file
-    model.save_to_file( options.model_file );
+    model.save( options.model_file );
     std::cout << "\rDistribution saved to " << options.model_file << "!" << std::endl;
     std::cout << "Processed lines: " << processed_lines << std::endl;
 
     if( save_graphs ) {
-        if( options.entropy.scale == DistributionScale::LINEAR ) {
-            model.save_graphs( graphs_path, "-lin.csv" );
-        }
-        if( options.entropy.scale == DistributionScale::LOG ) {
-            model.save_graphs( graphs_path, "-log.csv" );
-        }
+        model.save_graphs( graphs_path );
 
         std::ofstream fs( graphs_path + "domains_lengths.csv" );
         for( auto& length_freq: domains_lengths_freqencies ) {

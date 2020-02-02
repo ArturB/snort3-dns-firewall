@@ -60,12 +60,15 @@ std::ostream& operator<<( std::ostream& os, const Config::EntropyConfig& entropy
 
 bool Config::HmmConfig::operator==( const Config::HmmConfig& operand2 ) const
 {
-    return hidden_states == operand2.hidden_states;
+    return hidden_states == operand2.hidden_states && learning_rate == operand2.learning_rate &&
+           batch_size == operand2.batch_size;
 }
 
 std::ostream& operator<<( std::ostream& os, const Config::HmmConfig& hmm )
 {
-    os << "   * hidden states: " << hmm.hidden_states;
+    os << "   * hidden states: " << hmm.hidden_states << std::endl;
+    os << "   * learning rate: " << hmm.learning_rate << std::endl;
+    os << "   * batch size: " << hmm.batch_size;
     return os;
 }
 
@@ -89,6 +92,8 @@ Config::Config( const std::string& config_filename )
     max_length.penalty    = node["trainer"]["max-length"]["penalty"].as<double>();
 
     hmm.hidden_states = node["trainer"]["hmm"]["hidden-states"].as<int>();
+    hmm.learning_rate = node["trainer"]["hmm"]["learning-rate"].as<double>();
+    hmm.batch_size    = node["trainer"]["hmm"]["batch-size"].as<int>();
 
     entropy.bins          = node["trainer"]["entropy"]["bins"].as<int>();
     std::string log_scale = node["trainer"]["entropy"]["scale"].as<std::string>();

@@ -4,10 +4,10 @@ plugin:
     model:
         file: /usr/local/etc/snort/dns-firewall/basic.dfw3model
         weight: 1000000
-    whitelist:  /usr/local/etc/snort/dns-firewall/whitelist.txt
-    blacklist:  /usr/local/etc/snort/dns-firewall/blacklist.txt
+    whitelist:
+    blacklist:
     timeframe:
-        enabled: true
+        enabled: false
         period: 600
         max-queries: 600
     hmm:
@@ -32,7 +32,7 @@ plugin:
 
 trainer:
     dataset:
-        filename: data/rb-domains.log
+        filename: data/ccr-domains.log
         max-lines: -1
     model-file: bin/basic.dfw3model
     max-length:
@@ -40,8 +40,6 @@ trainer:
         penalty: 0.1
     hmm:
         hidden-states: 10
-        learning-rate: 0.0001
-        batch-size: 4096
     entropy:
         bins: 1000
         scale: log

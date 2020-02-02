@@ -25,7 +25,13 @@ dns_firewall::IpsOption::IpsOption( const std::string& config_filename )
     , processed_queries( 0 )
 {
     // Load model data
-    model.load( options.model.filename );
+    model.load_from_file( options.model.filename );
+    // Check if any of classifiers is enabled
+    if( not options.timeframe.enabled && not options.hmm.enabled &&
+        not options.entropy.enabled ) {
+        throw std::invalid_argument(
+          "At least one of available classifiers (timeframe, HMM, entropy) must be enabled!" );
+    }
     // Print current confiuguration
     std::cout << "[DNS Firewall] Current configuration: " << std::endl;
     std::cout << options << std::endl;
@@ -60,7 +66,7 @@ snort::IpsOption::EvalStatus dns_firewall::IpsOption::eval( Cursor&, Packet* p )
         model = classifier.create_model();
         // Save updated model file every 100 queries
         if( processed_queries % 100 == 0 ) {
-            model.save( options.model.filename );
+            model.save_to_file( options.model.filename );
         }
         return NO_MATCH;
     }
