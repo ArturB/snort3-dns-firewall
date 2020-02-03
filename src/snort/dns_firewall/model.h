@@ -24,11 +24,11 @@ namespace snort { namespace dns_firewall {
 
 struct Model
 {
-    scientific::ml::Hmm<char, std::string> hmm;
     unsigned query_max_length;
     double max_length_penalty;
-    unsigned bins;
     std::unordered_map<unsigned, std::vector<double>> entropy_distribution;
+    unsigned bins;
+    scientific::ml::Hmm<char, std::string> hmm;
 
     Model();
 
@@ -39,6 +39,7 @@ struct Model
     void load_from_file( std::string filename );
     void save_graphs( const std::string&, const std::string& = ".csv" );
 
+    bool operator==( const Model& ) const;
     friend std::ostream& operator<<( std::ostream&, const Model& );
 };
 

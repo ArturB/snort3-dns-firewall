@@ -15,10 +15,28 @@
 #ifndef SNORT_DNS_FIREWALL_HMM_DNS_CLASSIFIER_H
 #define SNORT_DNS_FIREWALL_HMM_DNS_CLASSIFIER_H
 
+#include "smart_hmm.h"
 #include <armadillo>
 #include <cmath>
+#include <string>
 
 namespace snort { namespace dns_firewall { namespace hmm {
+
+class DnsClassifier
+{
+  private:
+    scientific::ml::Hmm<char, std::string> hmm;
+
+  private:
+  public:
+    // Default constructor
+    DnsClassifier( unsigned window_width, unsigned dist_bins ) noexcept;
+
+    // Learn classifier with one DNS domain
+    void learn( const std::string& ) noexcept;
+    // Classify DNS domain
+    double classify( const std::string& ) noexcept;
+};
 
 }}} // namespace snort::dns_firewall::hmm
 

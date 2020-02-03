@@ -12,22 +12,22 @@ plugin:
         max-queries: 600
     hmm:
         enabled: true
-        min-length: 8
+        min-length: 7
         weight: 10
     entropy:
         enabled: true
-        min-length: 0
+        min-length: 7
         weight: 10
     short-reject:
         block-period: 5
-        threshold: -2
+        threshold: -1
         repetitions: 1
     long-reject:
         block-period: 60
-        threshold: -3
+        threshold: -2
         repetitions: 5
     permanent-reject:
-        threshold: -4
+        threshold: -3
         repetitions: 10
 
 trainer:
@@ -39,10 +39,12 @@ trainer:
         percentile: 0.99
         penalty: 0.1
     hmm:
-        hidden-states: 10
+        min-length: 7
+        hidden-states: 8
         learning-rate: 0.0001
         batch-size: 4096
     entropy:
+        min-length: 7
         bins: 1000
         scale: log
         window-widths: [

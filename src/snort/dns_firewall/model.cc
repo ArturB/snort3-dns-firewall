@@ -31,7 +31,7 @@ Model::Model()
 template<class Archive>
 void Model::serialize( Archive& archive )
 {
-    archive( query_max_length, max_length_penalty, bins, entropy_distribution );
+    archive( query_max_length, max_length_penalty, entropy_distribution, bins, hmm );
 }
 
 void Model::save_to_file( std::string filename )
@@ -64,13 +64,25 @@ void Model::save_graphs( const std::string& filename_prefix,
     }
 }
 
+bool Model::operator==( const Model& operand2 ) const
+{
+    return query_max_length == operand2.query_max_length &&
+           max_length_penalty == operand2.max_length_penalty &&
+           entropy_distribution == operand2.entropy_distribution && bins == operand2.bins &&
+           hmm == operand2.hmm;
+}
+
 std::ostream& operator<<( std::ostream& os, const Model& model )
 {
     os << "[DNS Firewall]  - Entropy window widths: ";
     for( auto& d: model.entropy_distribution ) {
         os << d.first << " ";
     }
-    os << std::endl;
+    std::cout << std::endl;
+    // os << model.hmm << std::endl;
+    os << "[DNS Firewall]  - HMM config:" << std::endl;
+    os << "[DNS Firewall]    * hidden states: " << model.hmm.get_states().size() << std::endl;
+    os << "[DNS Firewall]    * alphabet size: " << model.hmm.get_alphabet().size() << std::endl;
     os << "[DNS Firewall]  - Max queries length: " << model.query_max_length << std::endl;
     os << "[DNS Firewall]  - Max-length penalty: " << model.max_length_penalty;
     return os;

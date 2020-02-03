@@ -13,26 +13,28 @@
 // **********************************************************************
 
 #ifndef SCIENTIFIC_ML_SMART_HMM_H
-#    define SCIENTIFIC_ML_SMART_HMM_H
+#define SCIENTIFIC_ML_SMART_HMM_H
 
-#    include <algorithm>
-#    include <armadillo>
-#    include <cereal/archives/binary.hpp>
-#    include <cereal/types/string.hpp>
-#    include <cereal/types/unordered_map.hpp>
-#    include <cereal/types/vector.hpp>
-#    include <cmath>
-#    include <cstdio>
-#    include <cstdlib>
-#    include <fstream>
-#    include <iostream>
-#    include <limits>
-#    include <mutex>
-#    include <sstream>
-#    include <string>
-#    include <unistd.h>
-#    include <unordered_map>
-#    include <vector>
+#include "serializable_mat.h"
+#include <algorithm>
+#include <armadillo>
+#include <cereal/archives/binary.hpp>
+#include <cereal/types/polymorphic.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/types/unordered_map.hpp>
+#include <cereal/types/vector.hpp>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
+#include <limits>
+#include <mutex>
+#include <sstream>
+#include <string>
+#include <unistd.h>
+#include <unordered_map>
+#include <vector>
 
 namespace scientific { namespace ml {
 
@@ -145,7 +147,12 @@ class Hmm
 
     // Serialization
     template<class Archive>
-    void serialize( Archive& archive );
+    void save( Archive& archive ) const;
+    template<class Archive>
+    void load( Archive& archive );
+
+    void save_to_file( const std::string& ) const;
+    void load_from_file( const std::string& );
 
     // Assignment operator
     // As mutex field is present in the class,
@@ -160,7 +167,8 @@ class Hmm
         os << "Transitions: " << std::endl
            << h.transitions << std::endl
            << "Emissions: " << std::endl
-           << h.emissions;
+           << h.emissions << std::endl
+           << "Inirial states: " << h.initial_states;
         return os;
     }
 
@@ -542,7 +550,7 @@ void Hmm<E, S>::learn_parallel( const S& sequence, double learn_rate, unsigned b
     if( learning_buffer.size() == batch_size ) {
 
         // Parallel threads work
-#    pragma omp parallel for
+#pragma omp parallel for
         for( unsigned i = 0; i < NUM_THREADS; ++i ) {
 
             // One thread
@@ -572,49 +580,77 @@ void Hmm<E, S>::update( double learn_rate )
 // SERIALIZATION METHODS
 // **********************
 
-// Serialize armadillo
-template<class Archive>
-void save( Archive& archive, arma::mat& m )
-{
-    unsigned n_rows = m.n_rows;
-    unsigned n_cols = m.n_cols;
-    std::vector<double> m_vectorized;
-
-    m.resize( 1, n_rows * n_cols );
-    for( unsigned i = 0; i < n_rows * n_cols; ++i ) {
-        m_vectorized.push_back( m( i ) );
-    }
-
-    archive( n_rows, n_cols, m_vectorized );
-}
-
-// Deserialize armadillo
-template<class Archive>
-void load( Archive& archive, arma::mat& m )
-{
-    unsigned n_rows;
-    unsigned n_cols;
-    std::vector<double> m_vectorized;
-
-    archive( n_rows, n_cols, m_vectorized );
-    arma::mat m2( n_rows, n_cols );
-    m2.resize( 1, n_rows * n_cols );
-
-    m.resize( 1, n_rows * n_cols );
-    for( unsigned i = 0; i < n_rows * n_cols; ++i ) {
-        m2( i ) = m_vectorized[i];
-    }
-    m2.resize( n_rows, n_cols );
-    m = m2;
-}
-
-// template<class Archive>
-// void serialize( Archive& archive )
-// {
-//     archive( x, y, z );
-// }
-
 // Serialize HMM
+template<class E, class S>
+template<class Archive>
+void Hmm<E, S>::save( Archive& archive ) const
+{
+    SerializableMat initial_states_serializable( initial_states );
+    SerializableMat initial_states_prim_serializable( initial_states_prim );
+    SerializableMat transitions_serializable( transitions );
+    SerializableMat transitions_prim_serializable( transitions_prim );
+    SerializableMat emissions_serializable( emissions );
+    SerializableMat emissions_prim_serializable( emissions_prim );
+
+    archive( current_state,
+             initial_states_serializable,
+             initial_states_prim_serializable,
+             transitions_serializable,
+             transitions_prim_serializable,
+             emissions_serializable,
+             emissions_prim_serializable,
+             alphabet,
+             processed_lines,
+             learning_buffer );
+}
+
+template<class E, class S>
+template<class Archive>
+void Hmm<E, S>::load( Archive& archive )
+{
+    SerializableMat initial_states_serializable;
+    SerializableMat initial_states_prim_serializable;
+    SerializableMat transitions_serializable;
+    SerializableMat transitions_prim_serializable;
+    SerializableMat emissions_serializable;
+    SerializableMat emissions_prim_serializable;
+
+    archive( current_state,
+             initial_states_serializable,
+             initial_states_prim_serializable,
+             transitions_serializable,
+             transitions_prim_serializable,
+             emissions_serializable,
+             emissions_prim_serializable,
+             alphabet,
+             processed_lines,
+             learning_buffer );
+
+    initial_states      = initial_states_serializable.m;
+    initial_states_prim = initial_states_prim_serializable.m;
+    transitions         = transitions_serializable.m;
+    transitions_prim    = transitions_prim_serializable.m;
+    emissions           = emissions_serializable.m;
+    emissions_prim      = emissions_prim_serializable.m;
+}
+
+template<class E, class S>
+void Hmm<E, S>::save_to_file( const std::string& filename ) const
+{
+    std::ofstream fs( filename );
+    cereal::BinaryOutputArchive oarchive( fs );
+    oarchive( *this );
+    fs.close();
+}
+
+template<class E, class S>
+void Hmm<E, S>::load_from_file( const std::string& filename )
+{
+    std::ifstream fs( filename );
+    cereal::BinaryInputArchive iarchive( fs );
+    iarchive( *this );
+    fs.close();
+}
 
 // *****************
 // COMMON OPERATORS
@@ -655,8 +691,9 @@ bool Hmm<E, S>::operator==( const Hmm<E, S>& operand2 ) const
            arma::approx_equal( emissions_prim, operand2.emissions_prim, "absdiff", 0.0001 ) &&
            alphabet == operand2.alphabet && processed_lines == operand2.processed_lines;
 }
-
 }} // namespace scientific::ml
+
+// CEREAL_REGISTER_TYPE( scientific::ml::Hmm<char, std::string> )
 
 #endif // SCIENTIFIC_ML_SMART_HMM_H
 

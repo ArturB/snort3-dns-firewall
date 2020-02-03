@@ -34,11 +34,11 @@ struct Classification
     std::string domain;
     Note note;
     double score;
+    double score1;
     double score2;
 
     Classification();
-    Classification( const std::string&, Classification::Note, double );
-    Classification( const std::string&, Classification::Note, double, double );
+    Classification( const std::string&, Classification::Note, double, double, double );
     bool operator==( const Classification& ) const;
     bool operator<( const Classification& ) const;
     bool operator>( const Classification& ) const;

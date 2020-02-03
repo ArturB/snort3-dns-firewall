@@ -39,6 +39,7 @@ struct Config
     };
     struct HmmConfig
     {
+        unsigned min_length;
         unsigned hidden_states;
         double learning_rate;
         unsigned batch_size;
@@ -47,6 +48,7 @@ struct Config
     };
     struct EntropyConfig
     {
+        unsigned min_length;
         unsigned bins;
         snort::dns_firewall::DistributionScale scale;
         std::vector<unsigned> window_widths;

@@ -19,16 +19,7 @@ namespace snort { namespace dns_firewall {
 Classification::Classification()
     : note( Note::SCORE )
     , score( 0 )
-    , score2( 0 )
-{
-}
-
-Classification::Classification( const std::string& domain,
-                                Classification::Note note,
-                                double score )
-    : domain( domain )
-    , note( note )
-    , score( score )
+    , score1( 0 )
     , score2( 0 )
 {
 }
@@ -36,10 +27,12 @@ Classification::Classification( const std::string& domain,
 Classification::Classification( const std::string& domain,
                                 Classification::Note note,
                                 double score,
+                                double score1,
                                 double score2 )
     : domain( domain )
     , note( note )
     , score( score )
+    , score1( score1 )
     , score2( score2 )
 {
 }
@@ -68,14 +61,15 @@ std::ostream& operator<<( std::ostream& os, const Classification& cls )
         os << "[DNS Firewall] " << cls.domain << " WHITELIST";
     }
     if( cls.note == Classification::Note::INVALID_TIMEFRAME ) {
-        os << "[DNS Firewall] " << cls.domain << " INVALID_TIMEFRAME " << cls.score << "/"
+        os << "[DNS Firewall] " << cls.domain << " INVALID_TIMEFRAME " << cls.score1 << "/"
            << cls.score2;
     }
     if( cls.note == Classification::Note::MIN_LENGTH ) {
         os << "[DNS Firewall] " << cls.domain << " TOO SHORT";
     }
     if( cls.note == Classification::Note::SCORE ) {
-        os << "[DNS Firewall] " << cls.domain << " SCORE " << cls.score;
+        os << "[DNS Firewall] " << cls.domain << " SCORE hmm = " << cls.score1
+           << ", entropy = " << cls.score2 << ", total = " << cls.score;
     }
     return os;
 }

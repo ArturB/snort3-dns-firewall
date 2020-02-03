@@ -43,12 +43,13 @@ std::ostream& operator<<( std::ostream& os, const Config::MaxLengthConfig& max_l
 
 bool Config::EntropyConfig::operator==( const Config::EntropyConfig& operand2 ) const
 {
-    return bins == operand2.bins && scale == operand2.scale &&
-           window_widths == operand2.window_widths;
+    return min_length == operand2.min_length && bins == operand2.bins &&
+           scale == operand2.scale && window_widths == operand2.window_widths;
 }
 
 std::ostream& operator<<( std::ostream& os, const Config::EntropyConfig& entropy )
 {
+    os << "   * min length: " << entropy.min_length << std::endl;
     os << "   * distribution bins: " << entropy.bins << std::endl;
     os << "   * distribution scale: " << entropy.scale << std::endl;
     os << "   * window widths: ";
@@ -60,12 +61,13 @@ std::ostream& operator<<( std::ostream& os, const Config::EntropyConfig& entropy
 
 bool Config::HmmConfig::operator==( const Config::HmmConfig& operand2 ) const
 {
-    return hidden_states == operand2.hidden_states && learning_rate == operand2.learning_rate &&
-           batch_size == operand2.batch_size;
+    return min_length == operand2.min_length && hidden_states == operand2.hidden_states &&
+           learning_rate == operand2.learning_rate && batch_size == operand2.batch_size;
 }
 
 std::ostream& operator<<( std::ostream& os, const Config::HmmConfig& hmm )
 {
+    os << "   * min length: " << hmm.min_length << std::endl;
     os << "   * hidden states: " << hmm.hidden_states << std::endl;
     os << "   * learning rate: " << hmm.learning_rate << std::endl;
     os << "   * batch size: " << hmm.batch_size;
@@ -91,10 +93,12 @@ Config::Config( const std::string& config_filename )
     max_length.percentile = node["trainer"]["max-length"]["percentile"].as<double>();
     max_length.penalty    = node["trainer"]["max-length"]["penalty"].as<double>();
 
+    hmm.min_length    = node["trainer"]["hmm"]["min-length"].as<int>();
     hmm.hidden_states = node["trainer"]["hmm"]["hidden-states"].as<int>();
     hmm.learning_rate = node["trainer"]["hmm"]["learning-rate"].as<double>();
     hmm.batch_size    = node["trainer"]["hmm"]["batch-size"].as<int>();
 
+    entropy.min_length    = node["trainer"]["entropy"]["min-length"].as<int>();
     entropy.bins          = node["trainer"]["entropy"]["bins"].as<int>();
     std::string log_scale = node["trainer"]["entropy"]["scale"].as<std::string>();
     if( log_scale == "log" ) {

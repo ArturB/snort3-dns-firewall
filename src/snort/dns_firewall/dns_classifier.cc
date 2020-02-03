@@ -31,6 +31,7 @@ DnsClassifier::DnsClassifier( const Config& config )
 
     query_max_length   = model.query_max_length;
     max_length_penalty = model.max_length_penalty;
+    hmm_classifier     = model.hmm;
 
     // Initialize blacklist, if applicable
     if( not options.blacklist.empty() ) {
@@ -68,7 +69,7 @@ Classification DnsClassifier::classify_question( const std::string& domain )
     if( std::any_of( blacklist.begin(), blacklist.end(), [&]( auto blacklisted ) {
             return std::regex_match( domain, std::regex( ".*" + blacklisted ) );
         } ) ) {
-        return Classification( domain, Classification::Note::BLACKLIST, 0 );
+        return Classification( domain, Classification::Note::BLACKLIST, 0, 0, 0 );
     }
 
     // ****************
@@ -77,7 +78,7 @@ Classification DnsClassifier::classify_question( const std::string& domain )
     if( std::any_of( whitelist.begin(), whitelist.end(), [&]( auto whitelisted ) {
             return std::regex_match( domain, std::regex( ".*" + whitelisted ) );
         } ) ) {
-        return Classification( domain, Classification::Note::WHITELIST, 0 );
+        return Classification( domain, Classification::Note::WHITELIST, 0, 0, 0 );
     }
 
     // ****************
@@ -87,6 +88,7 @@ Classification DnsClassifier::classify_question( const std::string& domain )
                                        timeframe::DnsClassifier::Classification::INVALID ) {
         return Classification( domain,
                                Classification::Note::INVALID_TIMEFRAME,
+                               0,
                                timeframe_classifier.get_current_queries(),
                                options.timeframe.max_queries );
     }
@@ -97,6 +99,9 @@ Classification DnsClassifier::classify_question( const std::string& domain )
     double hmm_score  = 0;
     double hmm_weight = options.hmm.enabled ? options.hmm.weight : 0;
     if( options.hmm.enabled && domain.size() >= options.hmm.min_length ) {
+        auto best_path = hmm_classifier.find_viterbi_path( domain + "$" );
+        hmm_score =
+          ( best_path.prob / domain.size() ) + log10( hmm_classifier.get_alphabet().size() );
     }
 
     // *******************
@@ -118,23 +123,28 @@ Classification DnsClassifier::classify_question( const std::string& domain )
     // *******************
     double score = 0;
     if( hmm_weight + entropy_weight > 0 ) {
-        score = ( hmm_weight * hmm_score ) +
-                ( entropy_weight * entropy_score ) / ( hmm_weight + entropy_weight );
+        score = ( ( hmm_weight * hmm_score ) + ( entropy_weight * entropy_score ) ) /
+                ( hmm_weight + entropy_weight );
     }
 
     // *******************
     // MAX LENGTH PENALTY
     // *******************
     if( domain.size() > query_max_length ) {
-        score -= ( domain.size() - query_max_length ) * max_length_penalty;
+        double penalty = ( domain.size() - query_max_length ) * max_length_penalty;
+        // std::cout << "max length penalty, domain = " << domain
+        //           << ", query-max-length = " << query_max_length << ", penalty = " << penalty
+        //           << std::endl;
+        score -= penalty;
     }
 
-    return Classification( domain, Classification::Note::SCORE, score );
+    return Classification(
+      domain, Classification::Note::SCORE, score, hmm_score, entropy_score );
 }
 
 Classification DnsClassifier::classify( const DnsPacket& dns )
 {
-    Classification min_cls;
+    Classification min_cls( "", Classification::SCORE, 1000, 0, 0 );
     for( auto& q: dns.questions ) {
         Classification cls = classify_question( q.qname );
         if( cls < min_cls ) {

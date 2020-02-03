@@ -18,7 +18,9 @@
 #include "config.h"
 #include "entropy/dns_classifier.h"
 #include "hmm/dns_classifier.h"
+#include "smart_hmm.h"
 #include "timeframe/dns_classifier.h"
+#include <string>
 
 namespace snort { namespace dns_firewall {
 
@@ -35,8 +37,9 @@ class DnsClassifier
     double max_length_penalty;
     std::vector<std::string> blacklist;
     std::vector<std::string> whitelist;
-    timeframe::DnsClassifier timeframe_classifier;
     std::vector<entropy::DnsClassifier> entropy_classifiers;
+    scientific::ml::Hmm<char, std::string> hmm_classifier;
+    timeframe::DnsClassifier timeframe_classifier;
 
     Classification classify_question( const std::string& );
 

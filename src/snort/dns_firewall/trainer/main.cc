@@ -93,6 +93,8 @@ int main( int argc, char* const argv[] )
     std::cout << options << std::endl << std::endl;
 
     // Create line_processor objects
+    std::string dns_alphabet = "():/<>%_1234567890abcdefghijklmnopqrstuvwxyz.,-$";
+    scientific::ml::Hmm<char, std::string> hmm( options.hmm.hidden_states, dns_alphabet );
     std::vector<entropy::DnsClassifier> fifos;
     for( auto& w: options.entropy.window_widths ) {
         fifos.push_back( entropy::DnsClassifier( w, options.entropy.bins ) );
@@ -105,31 +107,29 @@ int main( int argc, char* const argv[] )
     std::string line;
     unsigned processed_lines = 0;
     std::cout.imbue( std::locale( "" ) );
-    std::vector<std::string> line_buf; // Thread lines buffer
 
     while( getline( dataset_file, line ) ) {
-        if( line.empty() ) {
-            continue;
-        }
+        // Max processed lines check
         if( options.dataset.max_lines > 0 &&
             processed_lines >= (unsigned) options.dataset.max_lines ) {
             break;
         }
-        line_buf.push_back( line );
+        // Collect domains length statistics
         ++domain_lengths[line.size()];
-        // If line buffer is big enough, learn each classifier in separate thread
-        if( line_buf.size() == 16384 ) {
-#pragma omp parallel for
-            for( unsigned i = 0; i < fifos.size(); ++i ) {
-                for( auto& l: line_buf ) {
-                    fifos[i].learn( l );
-                }
-            }
-            line_buf.clear();
+        // Learn HMM
+        if( line.size() >= options.hmm.min_length ) {
+            hmm.learn_parallel( line + "$", options.hmm.learning_rate, options.hmm.batch_size );
         }
+        // Learn entropy
+        if( line.size() >= options.entropy.min_length ) {
+            for( unsigned i = 0; i < fifos.size(); ++i ) {
+                fifos[i].learn( line );
+            }
+        }
+        // Count processed lines
         ++processed_lines;
         // Print results in real-time
-        if( processed_lines % 1024 == 0 ) {
+        if( processed_lines % 7 == 0 ) {
             std::cout << "\rProcessed lines: " << processed_lines << "    " << std::flush;
         }
     }
@@ -169,11 +169,20 @@ int main( int argc, char* const argv[] )
           f.get_entropy_distribution( options.entropy.scale );
     }
     model.bins = options.entropy.bins;
+    model.hmm  = hmm;
 
     // Save result distribution to file
     model.save_to_file( options.model_file );
     std::cout << "\rDistribution saved to " << options.model_file << "!" << std::endl;
     std::cout << "Processed lines: " << processed_lines << std::endl;
+
+    // Test save
+    Model model2;
+    model2.load_from_file( options.model_file );
+
+    // std::cout << hmm.find_viterbi_path( "www.youtube.com$" ) << std::endl;
+    // std::cout << model.hmm.find_viterbi_path( "www.youtube.com$" ) << std::endl;
+    // std::cout << model2.hmm.find_viterbi_path( "www.youtube.com$" ) << std::endl;
 
     if( save_graphs ) {
         if( options.entropy.scale == DistributionScale::LINEAR ) {
