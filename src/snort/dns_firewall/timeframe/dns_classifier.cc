@@ -35,15 +35,18 @@ unsigned DnsClassifier::get_current_queries() const
     return timestamps.size();
 }
 
-DnsClassifier::Classification DnsClassifier::insert( const std::string& domain )
+snort::dns_firewall::Classification DnsClassifier::insert( const std::string& domain )
 {
     pop_old();
     std::time_t current_timestamp = std::time( 0 );
     timestamps.push( DnsClassifier::DomainTimestamp( domain, current_timestamp ) );
     if( timestamps.size() <= options.timeframe.max_queries ) {
-        return Classification::VALID;
+        return Classification( domain, Classification::SCORE, 0.0, 0.0, 0.0 );
     } else {
-        return Classification::INVALID;
+        double penalty =
+          options.timeframe.penalty * ( timestamps.size() < -options.timeframe.max_queries );
+        return Classification(
+          domain, Classification::INVALID_TIMEFRAME, penalty, timestamps.size(), options.timeframe.max_queries );
     }
 }
 

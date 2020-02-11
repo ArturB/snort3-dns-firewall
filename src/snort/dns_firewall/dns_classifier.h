@@ -17,7 +17,6 @@
 
 #include "config.h"
 #include "entropy/dns_classifier.h"
-#include "hmm/dns_classifier.h"
 #include "smart_hmm.h"
 #include "timeframe/dns_classifier.h"
 #include <string>

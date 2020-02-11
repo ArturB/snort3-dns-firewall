@@ -25,6 +25,7 @@ struct Classification
     enum Note
     {
         BLACKLIST,
+        MAX_LENGTH,
         INVALID_TIMEFRAME,
         WHITELIST,
         MIN_LENGTH,

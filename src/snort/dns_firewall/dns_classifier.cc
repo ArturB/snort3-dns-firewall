@@ -64,7 +64,7 @@ DnsClassifier::DnsClassifier( const Config& config )
 Classification DnsClassifier::classify_question( const std::string& domain )
 {
     // ****************
-    // Blacklist check
+    // BLACKLIST CHECK
     // ****************
     if( std::any_of( blacklist.begin(), blacklist.end(), [&]( auto blacklisted ) {
             return std::regex_match( domain, std::regex( ".*" + blacklisted ) );
@@ -73,24 +73,12 @@ Classification DnsClassifier::classify_question( const std::string& domain )
     }
 
     // ****************
-    // Whitelist check
+    // WHITELIST CHECK
     // ****************
     if( std::any_of( whitelist.begin(), whitelist.end(), [&]( auto whitelisted ) {
             return std::regex_match( domain, std::regex( ".*" + whitelisted ) );
         } ) ) {
         return Classification( domain, Classification::Note::WHITELIST, 0, 0, 0 );
-    }
-
-    // ****************
-    // Timeframe check
-    // ****************
-    if( options.timeframe.enabled && timeframe_classifier.insert( domain ) ==
-                                       timeframe::DnsClassifier::Classification::INVALID ) {
-        return Classification( domain,
-                               Classification::Note::INVALID_TIMEFRAME,
-                               0,
-                               timeframe_classifier.get_current_queries(),
-                               options.timeframe.max_queries );
     }
 
     // ****************
@@ -100,8 +88,10 @@ Classification DnsClassifier::classify_question( const std::string& domain )
     double hmm_weight = options.hmm.enabled ? options.hmm.weight : 0;
     if( options.hmm.enabled && domain.size() >= options.hmm.min_length ) {
         auto best_path = hmm_classifier.find_viterbi_path( domain + "$" );
-        hmm_score =
-          ( best_path.prob / domain.size() ) + log10( hmm_classifier.get_alphabet().size() );
+
+        hmm_score = ( best_path.prob / domain.size() ) +
+                    log10( hmm_classifier.get_alphabet().size() +
+                           log10( hmm_classifier.get_states().size() ) );
     }
 
     // *******************
@@ -118,13 +108,23 @@ Classification DnsClassifier::classify_question( const std::string& domain )
         entropy_score /= entropy_classifiers.size();
     }
 
+    // *************
+    // Set defaults
+    // *************
+    Classification::Note note = Classification::Note::SCORE;
+
+    double score  = 0;
+    double score1 = 0;
+    double score2 = 0;
+
     // *******************
-    // TOTAL SCORE
+    // WEIGHTED SCORE
     // *******************
-    double score = 0;
     if( hmm_weight + entropy_weight > 0 ) {
         score = ( ( hmm_weight * hmm_score ) + ( entropy_weight * entropy_score ) ) /
                 ( hmm_weight + entropy_weight );
+        score1 = hmm_score;
+        score2 = entropy_score;
     }
 
     // *******************
@@ -135,11 +135,26 @@ Classification DnsClassifier::classify_question( const std::string& domain )
         // std::cout << "max length penalty, domain = " << domain
         //           << ", query-max-length = " << query_max_length << ", penalty = " << penalty
         //           << std::endl;
+        note = Classification::Note::MAX_LENGTH;
         score -= penalty;
+        score1 = domain.size();
+        score2 = query_max_length;
     }
 
-    return Classification(
-      domain, Classification::Note::SCORE, score, hmm_score, entropy_score );
+    // ******************
+    // TIMEFRAME PENALTY
+    // ******************
+    if( options.timeframe.enabled ) {
+        auto timeframe_result = timeframe_classifier.insert( domain );
+        if( timeframe_result.note == Classification::INVALID_TIMEFRAME ) {
+            note = Classification::Note::INVALID_TIMEFRAME;
+            score -= timeframe_result.score;
+            score1 = timeframe_result.score1;
+            score2 = timeframe_result.score2;
+        }
+    }
+
+    return Classification( domain, note, score, score1, score2 );
 }
 
 Classification DnsClassifier::classify( const DnsPacket& dns )

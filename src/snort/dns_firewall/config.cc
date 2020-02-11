@@ -64,7 +64,7 @@ std::ostream& operator<<( std::ostream& os, const Config::ModelConfig& model )
 bool Config::TimeframeConfig::operator==( const Config::TimeframeConfig& operand2 ) const
 {
     return enabled == operand2.enabled && period == operand2.period &&
-           max_queries == operand2.max_queries;
+           max_queries == operand2.max_queries && penalty == operand2.penalty;
 }
 
 std::ostream& operator<<( std::ostream& os, const Config::TimeframeConfig& timeframe )
@@ -72,7 +72,8 @@ std::ostream& operator<<( std::ostream& os, const Config::TimeframeConfig& timef
     os << "[DNS Firewall]    * enabled: " << ( timeframe.enabled ? "true" : "false" )
        << std::endl;
     os << "[DNS Firewall]    * period: " << timeframe.period << std::endl;
-    os << "[DNS Firewall]    * max-queries: " << timeframe.max_queries;
+    os << "[DNS Firewall]    * max-queries: " << timeframe.max_queries << std::endl;
+    os << "[DNS Firewall]    * penalty: " << timeframe.penalty;
     return os;
 }
 
@@ -107,14 +108,13 @@ std::ostream& operator<<( std::ostream& os, const Config::EntropyConfig& entropy
 
 bool Config::RejectConfig::operator==( const Config::RejectConfig& operand2 ) const
 {
-    return block_period == operand2.block_period && threshold == operand2.threshold &&
-           repetitions == operand2.repetitions;
+    return block_period == operand2.block_period && threshold == operand2.threshold;
 }
 
 std::ostream& operator<<( std::ostream& os, const Config::RejectConfig& reject )
 {
-    os << "[DNS Firewall]    * block-period: " << reject.block_period << std::endl;
-    os << "[DNS Firewall]    * threshold: " << reject.threshold;
+    os << "[DNS Firewall]    * threshold: " << reject.threshold << std::endl;
+    os << "[DNS Firewall]    * block-period: " << reject.block_period;
     return os;
 }
 
@@ -151,25 +151,18 @@ Config::Config( const std::string& config_filename )
     timeframe.enabled     = node["plugin"]["timeframe"]["enabled"].as<bool>();
     timeframe.period      = node["plugin"]["timeframe"]["period"].as<int>();
     timeframe.max_queries = node["plugin"]["timeframe"]["max-queries"].as<int>();
+    timeframe.penalty     = node["plugin"]["timeframe"]["penalty"].as<double>();
 
     hmm.enabled    = node["plugin"]["hmm"]["enabled"].as<bool>();
     hmm.min_length = node["plugin"]["hmm"]["min-length"].as<int>();
-    hmm.weight     = node["plugin"]["hmm"]["weight"].as<int>();
+    hmm.weight     = node["plugin"]["hmm"]["weight"].as<double>();
 
     entropy.enabled    = node["plugin"]["entropy"]["enabled"].as<bool>();
     entropy.min_length = node["plugin"]["entropy"]["min-length"].as<int>();
-    entropy.weight     = node["plugin"]["entropy"]["weight"].as<int>();
+    entropy.weight     = node["plugin"]["entropy"]["weight"].as<double>();
 
-    short_reject.block_period = node["plugin"]["short-reject"]["block-period"].as<int>();
-    short_reject.threshold    = node["plugin"]["short-reject"]["threshold"].as<int>();
-    short_reject.repetitions  = node["plugin"]["short-reject"]["repetitions"].as<int>();
-
-    long_reject.block_period = node["plugin"]["long-reject"]["block-period"].as<int>();
-    long_reject.threshold    = node["plugin"]["long-reject"]["threshold"].as<int>();
-    long_reject.repetitions  = node["plugin"]["long-reject"]["repetitions"].as<int>();
-
-    permanent_reject.threshold   = node["plugin"]["permanent-reject"]["threshold"].as<int>();
-    permanent_reject.repetitions = node["plugin"]["permanent-reject"]["repetitions"].as<int>();
+    short_reject.block_period = node["plugin"]["reject"]["block-period"].as<int>();
+    short_reject.threshold    = node["plugin"]["reject"]["threshold"].as<double>();
 }
 
 bool Config::operator==( const Config& operand2 ) const
@@ -177,8 +170,7 @@ bool Config::operator==( const Config& operand2 ) const
     return mode == operand2.mode && model == operand2.model &&
            blacklist == operand2.blacklist && whitelist == operand2.whitelist &&
            timeframe == operand2.timeframe && hmm == operand2.hmm &&
-           entropy == operand2.entropy && short_reject == operand2.short_reject &&
-           long_reject == operand2.long_reject && permanent_reject == operand2.permanent_reject;
+           entropy == operand2.entropy && short_reject == operand2.short_reject;
 }
 
 std::ostream& operator<<( std::ostream& os, const Config& options )
@@ -197,12 +189,8 @@ std::ostream& operator<<( std::ostream& os, const Config& options )
     os << "[DNS Firewall]  - Timeframe classifier:" << std::endl;
     os << options.timeframe << std::endl;
 
-    os << "[DNS Firewall]  - Short reject: " << std::endl;
+    os << "[DNS Firewall]  - Reject config: " << std::endl;
     os << options.short_reject << std::endl;
-    os << "[DNS Firewall]  - Long reject: " << std::endl;
-    os << options.long_reject << std::endl;
-    os << "[DNS Firewall]  - Permanent reject: " << std::endl;
-    os << options.permanent_reject;
 
     return os;
 }

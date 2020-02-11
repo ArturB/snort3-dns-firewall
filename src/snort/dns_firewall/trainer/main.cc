@@ -14,7 +14,6 @@
 
 #include "distribution_scale.h"
 #include "entropy/dns_classifier.h"
-#include "hmm/dns_classifier.h"
 #include "model.h"
 #include "smart_hmm.h"
 #include "trainer/config.h"
@@ -93,7 +92,7 @@ int main( int argc, char* const argv[] )
     std::cout << options << std::endl << std::endl;
 
     // Create line_processor objects
-    std::string dns_alphabet = "():/<>%_1234567890abcdefghijklmnopqrstuvwxyz.,-$";
+    std::string dns_alphabet = "%:/=+_1234567890abcdefghijklmnopqrstuvwxyz.,-$#@<>()[]";
     scientific::ml::Hmm<char, std::string> hmm( options.hmm.hidden_states, dns_alphabet );
     std::vector<entropy::DnsClassifier> fifos;
     for( auto& w: options.entropy.window_widths ) {
@@ -106,6 +105,7 @@ int main( int argc, char* const argv[] )
     std::ifstream dataset_file( options.dataset.filename );
     std::string line;
     unsigned processed_lines = 0;
+    unsigned skipped_lines   = 0;
     std::cout.imbue( std::locale( "" ) );
 
     while( getline( dataset_file, line ) ) {
@@ -118,7 +118,14 @@ int main( int argc, char* const argv[] )
         ++domain_lengths[line.size()];
         // Learn HMM
         if( line.size() >= options.hmm.min_length ) {
-            hmm.learn_parallel( line + "$", options.hmm.learning_rate, options.hmm.batch_size );
+            try {
+                hmm.learn(
+                  line + "$", options.hmm.learning_rate, options.hmm.batch_size );
+            } catch( ... ) {
+                std::cout << "CATCH: " << line << std::endl;
+                ++skipped_lines;
+                continue;
+            }
         }
         // Learn entropy
         if( line.size() >= options.entropy.min_length ) {
@@ -129,7 +136,7 @@ int main( int argc, char* const argv[] )
         // Count processed lines
         ++processed_lines;
         // Print results in real-time
-        if( processed_lines % 7 == 0 ) {
+        if( processed_lines % 1 == 0 ) {
             std::cout << "\rProcessed lines: " << processed_lines << "    " << std::flush;
         }
     }
@@ -175,6 +182,7 @@ int main( int argc, char* const argv[] )
     model.save_to_file( options.model_file );
     std::cout << "\rDistribution saved to " << options.model_file << "!" << std::endl;
     std::cout << "Processed lines: " << processed_lines << std::endl;
+    std::cout << "Skipped lines: " << skipped_lines << std::endl;
 
     // Test save
     Model model2;

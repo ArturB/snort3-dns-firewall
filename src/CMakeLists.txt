@@ -47,7 +47,6 @@ add_library (
         snort/dns_firewall/module.cc
         snort/dns_firewall/plugin.cc
         snort/dns_firewall/entropy/dns_classifier.cc
-        snort/dns_firewall/hmm/dns_classifier.cc
         snort/dns_firewall/timeframe/dns_classifier.cc
 )
 target_link_libraries(
@@ -70,7 +69,6 @@ add_executable(
         snort/dns_firewall/distribution_scale.cc
         snort/dns_firewall/model.cc
         snort/dns_firewall/entropy/dns_classifier.cc
-        snort/dns_firewall/hmm/dns_classifier.cc
         snort/dns_firewall/trainer/config.cc
         snort/dns_firewall/trainer/main.cc
 )

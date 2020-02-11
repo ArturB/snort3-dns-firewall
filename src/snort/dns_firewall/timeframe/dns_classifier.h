@@ -15,6 +15,7 @@
 #ifndef SNORT_DNS_FIREWALL_TIMEFRAME_DNS_CLASSIFIER_H
 #define SNORT_DNS_FIREWALL_TIMEFRAME_DNS_CLASSIFIER_H
 
+#include "classification.h"
 #include <cmath>
 #include <config.h>
 #include <ctime>
@@ -26,11 +27,6 @@ namespace snort { namespace dns_firewall { namespace timeframe {
 class DnsClassifier
 {
   public:
-    enum Classification
-    {
-        VALID,
-        INVALID
-    };
     struct DomainTimestamp
     {
         std::string domain;
@@ -50,7 +46,7 @@ class DnsClassifier
 
   public:
     explicit DnsClassifier( const snort::dns_firewall::Config& );
-    Classification insert( const std::string& );
+    snort::dns_firewall::Classification insert( const std::string& );
     unsigned get_current_queries() const;
 };
 

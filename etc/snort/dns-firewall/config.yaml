@@ -9,7 +9,8 @@ plugin:
     timeframe:
         enabled: true
         period: 600
-        max-queries: 600
+        max-queries: 1000
+        penalty: 0.01
     hmm:
         enabled: true
         min-length: 7
@@ -18,17 +19,9 @@ plugin:
         enabled: true
         min-length: 7
         weight: 10
-    short-reject:
+    reject:
         block-period: 5
         threshold: -1
-        repetitions: 1
-    long-reject:
-        block-period: 60
-        threshold: -2
-        repetitions: 5
-    permanent-reject:
-        threshold: -3
-        repetitions: 10
 
 trainer:
     dataset:

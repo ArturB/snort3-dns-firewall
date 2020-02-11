@@ -46,6 +46,7 @@ struct Config
         bool enabled;
         unsigned period;
         unsigned max_queries;
+        double penalty;
         bool operator==( const TimeframeConfig& ) const;
         friend std::ostream& operator<<( std::ostream&, const TimeframeConfig& );
     };
@@ -53,7 +54,7 @@ struct Config
     {
         bool enabled;
         unsigned min_length;
-        unsigned weight;
+        double weight;
         bool operator==( const HmmConfig& ) const;
         friend std::ostream& operator<<( std::ostream&, const HmmConfig& );
     };
@@ -61,7 +62,7 @@ struct Config
     {
         bool enabled;
         unsigned min_length;
-        unsigned weight;
+        double weight;
         bool operator==( const EntropyConfig& ) const;
         friend std::ostream& operator<<( std::ostream&, const EntropyConfig& );
     };
@@ -69,8 +70,7 @@ struct Config
     struct RejectConfig
     {
         unsigned block_period;
-        int threshold;
-        unsigned repetitions;
+        double threshold;
         bool operator==( const RejectConfig& ) const;
         friend std::ostream& operator<<( std::ostream&, const RejectConfig& );
     };
@@ -84,8 +84,6 @@ struct Config
     HmmConfig hmm;
     EntropyConfig entropy;
     RejectConfig short_reject;
-    RejectConfig long_reject;
-    RejectConfig permanent_reject;
 
     explicit Config( const std::string& );
     bool operator==( const Config& ) const;

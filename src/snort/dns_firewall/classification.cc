@@ -60,6 +60,10 @@ std::ostream& operator<<( std::ostream& os, const Classification& cls )
     if( cls.note == Classification::Note::WHITELIST ) {
         os << "[DNS Firewall] " << cls.domain << " WHITELIST";
     }
+    if( cls.note == Classification::Note::MAX_LENGTH ) {
+        os << "[DNS Firewall] " << cls.domain << " MAX_LENGTH " << cls.score1 << "/"
+           << cls.score2;
+    }
     if( cls.note == Classification::Note::INVALID_TIMEFRAME ) {
         os << "[DNS Firewall] " << cls.domain << " INVALID_TIMEFRAME " << cls.score1 << "/"
            << cls.score2;
