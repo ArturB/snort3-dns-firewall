@@ -54,6 +54,7 @@ struct Config
     {
         bool enabled;
         unsigned min_length;
+        double bias;
         double weight;
         bool operator==( const HmmConfig& ) const;
         friend std::ostream& operator<<( std::ostream&, const HmmConfig& );
@@ -62,6 +63,7 @@ struct Config
     {
         bool enabled;
         unsigned min_length;
+        double bias;
         double weight;
         bool operator==( const EntropyConfig& ) const;
         friend std::ostream& operator<<( std::ostream&, const EntropyConfig& );

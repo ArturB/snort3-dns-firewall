@@ -50,4 +50,21 @@ DnsPacket::DnsPacket( const uint8_t* data, unsigned dsize )
     }
 }
 
+DnsPacket::DnsPacket( const std::string& domain )
+    : id( 0 )
+    , flags( 0 )
+    , question_num( 1 )
+    , answer_num( 0 )
+    , authority_num( 0 )
+    , additional_num( 0 )
+    , questions()
+    , malformed( false )
+{
+    DnsPacket::Question q;
+    q.qname = domain;
+    q.qlen  = domain.size();
+    q.qtype = ( 1 );
+    questions.push_back( q );
+}
+
 }} // namespace snort::dns_firewall

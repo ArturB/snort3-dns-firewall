@@ -22,6 +22,7 @@ include_directories(
 
 set(LIBRARY_NAME "snort3dfw")
 set(TRAINER_NAME "dfw3trainer")
+set(TESTING_NAME "testdfw3")
 
 # ******************
 # SMART-HMM LIBRARY
@@ -80,6 +81,33 @@ target_link_libraries(
 )
 install (
     TARGETS ${TRAINER_NAME}
+    RUNTIME DESTINATION
+        ${CMAKE_INSTALL_FULL_BINDIR}/snort/${CMAKE_PROJECT_NAME}
+)
+
+# *******************
+# TESTING EXECUTABLE
+# *******************
+
+add_executable(
+    ${TESTING_NAME}
+        snort/dns_firewall/classification.cc
+        snort/dns_firewall/config.cc
+        snort/dns_firewall/dns_classifier.cc
+        snort/dns_firewall/dns_packet.cc
+        snort/dns_firewall/model.cc
+        snort/dns_firewall/test/main.cc
+        snort/dns_firewall/entropy/dns_classifier.cc
+        snort/dns_firewall/timeframe/dns_classifier.cc
+)
+target_link_libraries(
+    ${TESTING_NAME}
+    armadillo
+    omp
+    yaml-cpp
+)
+install (
+    TARGETS ${TESTING_NAME}
     RUNTIME DESTINATION
         ${CMAKE_INSTALL_FULL_BINDIR}/snort/${CMAKE_PROJECT_NAME}
 )

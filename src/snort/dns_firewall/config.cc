@@ -80,13 +80,14 @@ std::ostream& operator<<( std::ostream& os, const Config::TimeframeConfig& timef
 bool Config::HmmConfig::operator==( const Config::HmmConfig& operand2 ) const
 {
     return enabled == operand2.enabled && min_length == operand2.min_length &&
-           weight == operand2.weight;
+           bias == operand2.bias && weight == operand2.weight;
 }
 
 std::ostream& operator<<( std::ostream& os, const Config::HmmConfig& hmm )
 {
     os << "[DNS Firewall]    * enabled: " << ( hmm.enabled ? "true" : "false" ) << std::endl;
     os << "[DNS Firewall]    * min-length: " << hmm.min_length << std::endl;
+    os << "[DNS Firewall]    * bias: " << hmm.bias << std::endl;
     os << "[DNS Firewall]    * weight: " << hmm.weight;
     return os;
 }
@@ -94,7 +95,7 @@ std::ostream& operator<<( std::ostream& os, const Config::HmmConfig& hmm )
 bool Config::EntropyConfig::operator==( const Config::EntropyConfig& operand2 ) const
 {
     return enabled == operand2.enabled && min_length == operand2.min_length &&
-           weight == operand2.weight;
+           bias == operand2.bias && weight == operand2.weight;
 }
 
 std::ostream& operator<<( std::ostream& os, const Config::EntropyConfig& entropy )
@@ -102,6 +103,7 @@ std::ostream& operator<<( std::ostream& os, const Config::EntropyConfig& entropy
     os << "[DNS Firewall]    * enabled: " << ( entropy.enabled ? "true" : "false" )
        << std::endl;
     os << "[DNS Firewall]    * min-length: " << entropy.min_length << std::endl;
+    os << "[DNS Firewall]    * bias: " << entropy.bias << std::endl;
     os << "[DNS Firewall]    * weight: " << entropy.weight;
     return os;
 }
@@ -155,10 +157,12 @@ Config::Config( const std::string& config_filename )
 
     hmm.enabled    = node["plugin"]["hmm"]["enabled"].as<bool>();
     hmm.min_length = node["plugin"]["hmm"]["min-length"].as<int>();
+    hmm.bias       = node["plugin"]["hmm"]["bias"].as<double>();
     hmm.weight     = node["plugin"]["hmm"]["weight"].as<double>();
 
     entropy.enabled    = node["plugin"]["entropy"]["enabled"].as<bool>();
     entropy.min_length = node["plugin"]["entropy"]["min-length"].as<int>();
+    entropy.bias       = node["plugin"]["entropy"]["bias"].as<double>();
     entropy.weight     = node["plugin"]["entropy"]["weight"].as<double>();
 
     short_reject.block_period = node["plugin"]["reject"]["block-period"].as<int>();

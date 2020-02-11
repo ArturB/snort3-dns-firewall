@@ -14,14 +14,16 @@ plugin:
     hmm:
         enabled: true
         min-length: 7
+        bias: 0.1
         weight: 10
     entropy:
         enabled: true
         min-length: 7
+        bias: 1.0
         weight: 10
     reject:
         block-period: 5
-        threshold: -1
+        threshold: 0
 
 trainer:
     dataset:
@@ -32,14 +34,14 @@ trainer:
         percentile: 0.99
         penalty: 0.1
     hmm:
-        min-length: 7
+        min-length: 5
         hidden-states: 8
         learning-rate: 0.0001
         batch-size: 4096
     entropy:
-        min-length: 7
+        min-length: 5
         bins: 1000
         scale: log
         window-widths: [
-            30,100,300,1000
+            100,300,1000,3000
         ]

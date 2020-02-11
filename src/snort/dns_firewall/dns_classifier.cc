@@ -90,8 +90,8 @@ Classification DnsClassifier::classify_question( const std::string& domain )
         auto best_path = hmm_classifier.find_viterbi_path( domain + "$" );
 
         hmm_score = ( best_path.prob / domain.size() ) +
-                    log10( hmm_classifier.get_alphabet().size() +
-                           log10( hmm_classifier.get_states().size() ) );
+                    log10( hmm_classifier.get_alphabet().size() ) +
+                    log10( hmm_classifier.get_states().size() ) + options.hmm.bias;
     }
 
     // *******************
@@ -106,6 +106,7 @@ Classification DnsClassifier::classify_question( const std::string& domain )
             entropy_score += c.classify( domain );
         }
         entropy_score /= entropy_classifiers.size();
+        entropy_score += options.entropy.bias;
     }
 
     // *************
@@ -137,8 +138,8 @@ Classification DnsClassifier::classify_question( const std::string& domain )
         //           << std::endl;
         note = Classification::Note::MAX_LENGTH;
         score -= penalty;
-        score1 = domain.size();
-        score2 = query_max_length;
+        // score1 = domain.size();
+        // score2 = query_max_length;
     }
 
     // ******************

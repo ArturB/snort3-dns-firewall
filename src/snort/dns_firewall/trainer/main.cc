@@ -35,6 +35,7 @@ int main( int argc, char* const argv[] )
       "       from YAML file is overwritten.\n\n"
       "   -f: File name of the dataset to process\n"
       "   -n: max number of lines to process\n"
+      "   -s: Markov hidden states\n"
       "   -o: Model file name\n"
       "   -h: Print this help\n";
 
@@ -46,8 +47,9 @@ int main( int argc, char* const argv[] )
     std::string dataset_filename_getopt;
     std::string model_filename_getopt;
     int max_lines_getopt = -1;
+    int hidden_states    = -1;
 
-    while( ( opt = getopt( argc, argv, "g:c:f:n:o:h" ) ) != -1 ) {
+    while( ( opt = getopt( argc, argv, "g:c:f:n:s:o:h" ) ) != -1 ) {
         switch( opt ) {
         case 'g':
             save_graphs = true;
@@ -61,6 +63,9 @@ int main( int argc, char* const argv[] )
             break;
         case 'n':
             max_lines_getopt = std::stoi( optarg );
+            break;
+        case 's':
+            hidden_states = std::stoi( optarg );
             break;
         case 'o':
             model_filename_getopt = std::string( optarg );
@@ -85,10 +90,14 @@ int main( int argc, char* const argv[] )
     if( max_lines_getopt != -1 ) {
         options.dataset.max_lines = max_lines_getopt;
     }
+    if( hidden_states != -1 ) {
+        options.hmm.hidden_states = hidden_states;
+    }
     if( model_filename_getopt != "" ) {
         options.model_file = model_filename_getopt;
     }
-    // Load and print trainer options
+
+    // Print trainer options
     std::cout << options << std::endl << std::endl;
 
     // Create line_processor objects
@@ -119,8 +128,7 @@ int main( int argc, char* const argv[] )
         // Learn HMM
         if( line.size() >= options.hmm.min_length ) {
             try {
-                hmm.learn(
-                  line + "$", options.hmm.learning_rate, options.hmm.batch_size );
+                hmm.learn( line + "$", options.hmm.learning_rate, options.hmm.batch_size );
             } catch( ... ) {
                 std::cout << "CATCH: " << line << std::endl;
                 ++skipped_lines;

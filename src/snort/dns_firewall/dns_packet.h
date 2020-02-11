@@ -37,6 +37,7 @@ struct DnsPacket
     };
 
     explicit DnsPacket( const uint8_t*, unsigned );
+    explicit DnsPacket( const std::string& domain );
 
     u_int16_t id;
     u_int16_t flags;

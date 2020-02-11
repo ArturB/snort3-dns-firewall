@@ -12,10 +12,10 @@
 // GNU General Public License for more details.
 // **********************************************************************
 
-#include "entropy/dns_classifier.h"
-#include "hmm/dns_classifier.h"
+#include "config.h"
+#include "dns_classifier.h"
+#include "dns_packet.h"
 #include "model.h"
-#include "trainer/config.h"
 
 extern char* optarg;
 
@@ -26,32 +26,29 @@ using namespace snort::dns_firewall;
 // ----------------
 int main( int argc, char* const argv[] )
 {
-    std::cout << "snort3trainer 0.1.1 by Artur M. Brodzki" << std::endl << std::endl;
+    std::cout << "testdfw3 0.1.1 by Artur M. Brodzki" << std::endl << std::endl;
     std::string help =
       "Usage:\n"
       "   -c: YAML config file name (mandatory)\n\n"
-      "       If -f, -n, -o option is specified, configuration\n"
+      "       If -f, -n, -m, -o option is specified, configuration\n"
       "       from YAML file is overwritten.\n\n"
-      "   -f: File name of the dataset to process\n"
+      "   -f: File name of the test dataset to process\n"
       "   -n: max number of lines to process\n"
-      "   -o: Model file name\n"
+      "   -m: Model file name\n"
+      "   -o: Output file name\n"
       "   -h: Print this help\n";
 
     // Parse command line options
     int opt;
-    bool save_graphs = false;
     std::string graphs_path;
     std::string yaml_filename_getopt;
     std::string dataset_filename_getopt;
+    std::string output_filename_getopt;
     std::string model_filename_getopt;
     int max_lines_getopt = -1;
 
-    while( ( opt = getopt( argc, argv, "g:c:f:n:o:h" ) ) != -1 ) {
+    while( ( opt = getopt( argc, argv, "c:f:n:m:o:h" ) ) != -1 ) {
         switch( opt ) {
-        case 'g':
-            save_graphs = true;
-            graphs_path = std::string( optarg );
-            break;
         case 'c':
             yaml_filename_getopt = std::string( optarg );
             break;
@@ -61,8 +58,11 @@ int main( int argc, char* const argv[] )
         case 'n':
             max_lines_getopt = std::stoi( optarg );
             break;
-        case 'o':
+        case 'm':
             model_filename_getopt = std::string( optarg );
+            break;
+        case 'o':
+            output_filename_getopt = std::string( optarg );
             break;
         case 'h':
             std::cout << help << std::endl;
@@ -76,111 +76,60 @@ int main( int argc, char* const argv[] )
     }
     // Load config file
     std::cout << "Config file: " << yaml_filename_getopt << std::endl;
-    trainer::Config options = trainer::Config( yaml_filename_getopt );
-    if( dataset_filename_getopt != "" ) {
-        options.dataset.filename  = dataset_filename_getopt;
-        options.dataset.max_lines = -1;
-    }
-    if( max_lines_getopt != -1 ) {
-        options.dataset.max_lines = max_lines_getopt;
-    }
+    Config options = Config( yaml_filename_getopt );
     if( model_filename_getopt != "" ) {
-        options.model_file = model_filename_getopt;
+        options.model.filename = model_filename_getopt;
     }
-    // Load and print trainer options
-    std::cout << options << std::endl << std::endl;
+    // Turn off timeframe classifier
+    options.timeframe.enabled = false;
 
-    // Create line_processor objects
-    std::vector<entropy::DnsClassifier> fifos;
-    for( auto& w: options.entropy.window_widths ) {
-        fifos.push_back( entropy::DnsClassifier( w, options.entropy.bins ) );
-    }
-    // Collect domain length stats
-    std::unordered_map<unsigned, unsigned> domain_lengths;
+    // Load model
+    Model model;
+    model.load_from_file( options.model.filename );
+    // Print basic model characteristics
+    std::cout << model << std::endl << std::endl;
+
+    // Create DNS classifier
+    snort::dns_firewall::DnsClassifier cls( options );
 
     // Process data line by line
-    std::ifstream dataset_file( options.dataset.filename );
+    std::ifstream dataset_file( dataset_filename_getopt );
+    std::ofstream output_file( output_filename_getopt );
     std::string line;
     unsigned processed_lines = 0;
+    unsigned skipped_lines   = 0;
     std::cout.imbue( std::locale( "" ) );
-    std::vector<std::string> line_buf; // Thread lines buffer
+
+    output_file << "DOMAIN;HMM;ENTROPY;TOTAL" << std::endl;
 
     while( getline( dataset_file, line ) ) {
         if( line.empty() ) {
             continue;
         }
-        if( options.dataset.max_lines > 0 &&
-            processed_lines >= (unsigned) options.dataset.max_lines ) {
+        if( max_lines_getopt > 0 && processed_lines >= (unsigned) max_lines_getopt ) {
             break;
         }
-        line_buf.push_back( line );
-        ++domain_lengths[line.size()];
-        // If line buffer is big enough, learn each classifier in separate thread
-        if( line_buf.size() == 16384 ) {
-#pragma omp parallel for
-            for( unsigned i = 0; i < fifos.size(); ++i ) {
-                for( auto& l: line_buf ) {
-                    fifos[i].learn( l );
-                }
+        if( processed_lines % 1 == 0 && line.size() >= options.hmm.min_length ) {
+            try {
+                auto result = cls.classify( DnsPacket( line ) );
+                output_file << result.domain << ";" << result.score1 << ";" << result.score2
+                            << ";" << result.score << std::endl;
+            } catch( ... ) {
+                std::cout << "CATCH: " << line << std::endl;
+                ++skipped_lines;
+                continue;
             }
-            line_buf.clear();
         }
         ++processed_lines;
-        // Print results in real-time
+        // Print progress in real-time
         if( processed_lines % 1024 == 0 ) {
             std::cout << "\rProcessed lines: " << processed_lines << "    " << std::flush;
         }
     }
 
-    // Calculate lengths distribution
-    unsigned max_domain_length = 0;
-    for( auto& d: domain_lengths ) {
-        max_domain_length = std::max( max_domain_length, d.first );
-    }
-    unsigned all_domain_num = 0;
-    for( auto& d: domain_lengths ) {
-        all_domain_num += d.second;
-    }
-    std::vector<double> domains_lengths_freqencies( max_domain_length + 1, 0 );
-    for( auto& freq: domain_lengths ) {
-        domains_lengths_freqencies[freq.first] =
-          double( freq.second ) / double( all_domain_num );
-    }
-    // Calculate length percentile
-    unsigned cumulative        = 0;
-    unsigned percentile_length = 0;
-    for( auto& d: domain_lengths ) {
-        cumulative += d.second;
-        if( double( cumulative ) / all_domain_num > options.max_length.percentile ) {
-            percentile_length = d.first;
-            break;
-        }
-    }
-
-    // Create model file
-    snort::dns_firewall::Model model;
-    model.query_max_length   = percentile_length;
-    model.max_length_penalty = options.max_length.penalty;
-    for( auto& f: fifos ) {
-        unsigned win_width = f.get_window_width();
-        model.entropy_distribution[win_width] =
-          f.get_entropy_distribution( options.entropy.scale );
-    }
-
-    // Save result distribution to file
-    model.save( options.model_file );
-    std::cout << "\rDistribution saved to " << options.model_file << "!" << std::endl;
+    std::cout << "\rTest results saved to " << output_filename_getopt << "!" << std::endl;
     std::cout << "Processed lines: " << processed_lines << std::endl;
-
-    if( save_graphs ) {
-        model.save_graphs( graphs_path );
-
-        std::ofstream fs( graphs_path + "domains_lengths.csv" );
-        for( auto& length_freq: domains_lengths_freqencies ) {
-            fs << length_freq << std::endl;
-        }
-        fs.close();
-    }
+    std::cout << "Skipped lines: " << skipped_lines << std::endl;
 
     return 0;
 }
