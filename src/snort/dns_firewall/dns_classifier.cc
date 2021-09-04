@@ -133,13 +133,10 @@ Classification DnsClassifier::classify_question( const std::string& domain )
     // *******************
     if( domain.size() > query_max_length ) {
         double penalty = ( domain.size() - query_max_length ) * max_length_penalty;
-        // std::cout << "max length penalty, domain = " << domain
-        //           << ", query-max-length = " << query_max_length << ", penalty = " << penalty
-        //           << std::endl;
         note = Classification::Note::MAX_LENGTH;
         score -= penalty;
-        // score1 = domain.size();
-        // score2 = query_max_length;
+        score1 = domain.size();
+        score2 = query_max_length;
     }
 
     // ******************

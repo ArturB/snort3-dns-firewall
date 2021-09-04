@@ -87,16 +87,19 @@ snort::IpsOption::EvalStatus dns_firewall::IpsOption::eval( Cursor&, Packet* p )
         return NO_MATCH;
     }
     // Reject query
-    if( cls.note == Classification::Note::BLACKLIST ||
-        cls.note == Classification::Note::INVALID_TIMEFRAME ||
-        ( cls.note == Classification::Note::SCORE &&
-          cls.score < options.short_reject.threshold ) ) {
+    else if( cls.note == Classification::Note::BLACKLIST ||
+             cls.note == Classification::Note::INVALID_TIMEFRAME ||
+             cls.note == Classification::Note::MAX_LENGTH ||
+             ( cls.note == Classification::Note::SCORE &&
+               cls.score < options.short_reject.threshold ) ) {
         // If verbosity level requires, print to stdout
         if( options.verbosity == Config::Verbosity::ALL ||
             options.verbosity == Config::Verbosity::REJECT_ONLY ) {
             std::cout << cls << " REJECT" << std::endl;
         }
         return MATCH;
+    } else {
+        std::cout << "ELSE: " << cls << std::endl;
     }
 
     return NO_MATCH; // this line should never execute
